@@ -1,30 +1,64 @@
-# Flujo Base de Desarrollo con Spec-Driven Development + Vibe Coding
+<h1 align="center">
+  Spec-Driven Development + Vibe Coding
+</h1>
 
-![Portada](https://framerusercontent.com/images/qBfGDRPfKupvBRH01Bwds8.png?width=1080&height=843)
+<p align="center">
+  <img
+    src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&duration=3000&pause=1000&center=true&vCenter=true&width=900&lines=Idea+%E2%86%92+Specification+%E2%86%92+Plan+%E2%86%92+Code+%E2%86%92+Tests;AI-Assisted+Software+Engineering;Build+with+Specs%2C+Architecture+and+Quality"
+    alt="Typing SVG"
+  />
+</p>
 
-> Objetivo: convertir una idea en una funcionalidad implementada, documentada y validada mediante un proceso repetible apoyado por IA.
+<p align="center">
+  <strong>Flujo base para crear software con IA, arquitectura y tests desde el primer día</strong>
+</p>
+
+<p align="center">
+  <em>Idea → Brief → Spec → Plan IA → Implementación → Tests → Review → Commit</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Living%20Document-blue" />
+  <img src="https://img.shields.io/badge/Methodology-Spec--Driven%20Development-purple" />
+  <img src="https://img.shields.io/badge/AI--Assisted-Development-green" />
+  <img src="https://img.shields.io/badge/Focus-Software%20Engineering-orange" />
+</p>
+
+---
+
+<p align="center">
+  <img
+    src="https://framerusercontent.com/images/qBfGDRPfKupvBRH01Bwds8.png?width=1080&height=843"
+    alt="Portada"
+    width="900"
+  />
+</p>
+
+> **Objetivo:** convertir una idea en una funcionalidad implementada, documentada y validada mediante un proceso repetible apoyado por IA.
 
 ---
 
 # Índice
 
-- [Filosofía](#filosofía)
-- [Roles](#roles)
-- [Flujo General](#flujo-general)
-- [Paso 1. Product Brief](#paso-1-product-brief)
-- [Paso 2. Arquitectura](#paso-2-arquitectura)
-- [Paso 3. Specifications](#paso-3-crear-las-specifications)
-- [Paso 4. Reglas para la IA](#paso-4-definir-las-reglas-para-la-ia)
-- [Paso 5. Planificación](#paso-5-planificar-antes-de-programar)
-- [Paso 6. Implementación](#paso-6-implementación)
-- [Paso 7. Testing](#paso-7-testing)
-- [Paso 8. Review](#paso-8-review)
-- [Paso 9. Documentación](#paso-9-documentación)
-- [Paso 10. Commit](#paso-10-commit)
-- [Checklist](#checklist-de-una-feature)
-- [Estructura recomendada](#estructura-recomendada)
-- [Principios](#principios)
-- [Referencias](#referencias)
+- [Filosofía](#-filosofía)
+- [Roles](#-roles)
+- [Flujo General](#-flujo-general)
+- [Paso 1. Product Brief](#-paso-1-product-brief)
+- [Paso 2. Arquitectura](#-paso-2-arquitectura)
+- [Paso 3. Specifications](#-paso-3-crear-las-specifications)
+- [Paso 4. Reglas para la IA](#-paso-4-definir-las-reglas-para-la-ia)
+- [Paso 5. Planificación](#-paso-5-planificar-antes-de-programar)
+- [Paso 6. Implementación](#-paso-6-implementación)
+- [Paso 7. Testing](#-paso-7-testing)
+- [Paso 8. Review](#-paso-8-review)
+- [Paso 9. Documentación](#-paso-9-documentación)
+- [Paso 10. Commit](#-paso-10-commit)
+- [Checklist](#-checklist-de-una-feature)
+- [ADR](#-adr-architecture-decision-records)
+- [Estructura recomendada](#-estructura-recomendada)
+- [Principios](#-principios)
+- [Recursos recomendados](#-recursos-recomendados)
+- [Referencias](#-referencias)
 
 ---
 
@@ -38,6 +72,7 @@ El desarrollador es responsable de:
 - Diseñar la solución.
 - Validar la implementación.
 - Garantizar la calidad.
+- Decidir qué entra y qué no entra en el sistema.
 
 La IA actúa como un acelerador del desarrollo.
 
@@ -51,6 +86,9 @@ Puede ayudar a:
 - Crear documentación.
 - Generar pruebas.
 - Revisar código.
+
+> La IA genera velocidad.
+> La ingeniería aporta dirección.
 
 ---
 
@@ -90,7 +128,7 @@ Specification
     ↓
 Plan de implementación
     ↓
-Implementación
+Implementación asistida por IA
     ↓
 Testing
     ↓
@@ -107,7 +145,7 @@ Commit
 
 Crear:
 
-```
+```text
 docs/00-product-brief.md
 ```
 
@@ -152,7 +190,7 @@ El objetivo es tener una visión clara antes de escribir una sola línea de cód
 
 Crear:
 
-```
+```text
 docs/architecture.md
 ```
 
@@ -170,21 +208,21 @@ Ejemplo:
 
 ## Organización
 
-Controllers
-Services
-Repositories
-Models
-Policies
-Middleware
-Requests
-Jobs
+- Controllers
+- Services
+- Repositories
+- Models
+- Policies
+- Middleware
+- Requests
+- Jobs
 
 ## Convenciones
 
-- Controladores delgados
-- Validaciones mediante Form Requests
-- Servicios para lógica de negocio
-- Tests obligatorios
+- Controladores delgados.
+- Validaciones mediante Form Requests.
+- Servicios para lógica de negocio.
+- Tests obligatorios.
 ```
 
 Toda implementación deberá respetar esta arquitectura.
@@ -195,13 +233,13 @@ Toda implementación deberá respetar esta arquitectura.
 
 Cada funcionalidad importante debe tener una Specification independiente.
 
-```
+```text
 docs/specs/
 ```
 
 Ejemplo:
 
-```
+```text
 docs/specs/
 
 001-auth.md
@@ -236,13 +274,13 @@ Nunca implementar una funcionalidad sin una Specification.
 
 Crear:
 
-```
+```text
 AGENTS.md
 ```
 
 o
 
-```
+```text
 .cursor/rules/project.md
 ```
 
@@ -280,7 +318,7 @@ No pedir:
 
 Pedir:
 
-```
+```text
 Lee la documentación del proyecto.
 
 Resume la Specification.
@@ -296,7 +334,7 @@ No escribas código todavía.
 
 Cuando el plan sea correcto:
 
-```
+```text
 Implementa el plan paso a paso.
 
 Después ejecuta los tests.
@@ -310,10 +348,10 @@ Finalmente resume todos los cambios realizados.
 
 La IA implementa respetando:
 
-- Arquitectura
-- Convenciones
-- Specifications
-- Tests
+- Arquitectura.
+- Convenciones.
+- Specifications.
+- Tests.
 
 Cada cambio debe ser:
 
@@ -327,14 +365,16 @@ Cada cambio debe ser:
 
 Toda funcionalidad debería incluir:
 
-- Tests unitarios
-- Tests de integración
-- Casos negativos
-- Casos límite
+- Tests unitarios.
+- Tests de integración.
+- Casos negativos.
+- Casos límite.
 
 Objetivo:
 
-✅ Suite completamente en verde.
+```text
+✅ Suite completamente en verde
+```
 
 ---
 
@@ -342,13 +382,13 @@ Objetivo:
 
 Antes del commit revisar:
 
-- Código duplicado
-- Complejidad
-- Seguridad
-- Rendimiento
-- Arquitectura
-- Cobertura de tests
-- Convenciones
+- Código duplicado.
+- Complejidad.
+- Seguridad.
+- Rendimiento.
+- Arquitectura.
+- Cobertura de tests.
+- Convenciones.
 
 ---
 
@@ -356,7 +396,7 @@ Antes del commit revisar:
 
 Actualizar cuando sea necesario:
 
-```
+```text
 README.md
 
 docs/
@@ -372,11 +412,11 @@ La documentación forma parte del desarrollo.
 
 # Paso 10. Commit
 
-Realizar commits pequeños.
+Realizar commits pequeños y con propósito.
 
 Ejemplos:
 
-```
+```text
 feat(auth): implement login flow
 
 refactor(users): extract validation to Form Requests
@@ -392,26 +432,26 @@ docs(spec): update validation specification
 
 Antes de dar por terminada una funcionalidad:
 
-- [ ] Product Brief actualizado
-- [ ] Specification creada
-- [ ] Arquitectura revisada
-- [ ] Plan validado
-- [ ] Implementación completada
-- [ ] Tests añadidos
-- [ ] Suite en verde
-- [ ] Review realizada
-- [ ] Documentación actualizada
-- [ ] Commit realizado
+- [ ] Product Brief actualizado.
+- [ ] Specification creada.
+- [ ] Arquitectura revisada.
+- [ ] Plan validado.
+- [ ] Implementación completada.
+- [ ] Tests añadidos.
+- [ ] Suite en verde.
+- [ ] Review realizada.
+- [ ] Documentación actualizada.
+- [ ] Commit realizado.
 
 ---
 
-# ADR (Architecture Decision Records)
+# ADR: Architecture Decision Records
 
 Toda decisión importante debería registrarse.
 
 Ejemplo:
 
-```
+```text
 docs/decisions/
 
 ADR-001-use-laravel.md
@@ -423,17 +463,17 @@ ADR-003-cache-strategy.md
 
 Un ADR explica:
 
-- Contexto
-- Problema
-- Alternativas
-- Decisión
-- Consecuencias
+- Contexto.
+- Problema.
+- Alternativas.
+- Decisión.
+- Consecuencias.
 
 ---
 
 # Estructura recomendada
 
-```
+```text
 project/
 
 docs/
@@ -486,14 +526,6 @@ tests/
 
 # Recursos recomendados
 
-## Artículos
-
-- Nitor Infotech – Steps to Start with Spec-Driven Development
-
-## Vídeos
-
-### Vibe Coding
-
 [![Vibe Coding](https://img.youtube.com/vi/uquw8yUKaYM/maxresdefault.jpg)](https://www.youtube.com/watch?v=uquw8yUKaYM)
 
 ---
@@ -505,6 +537,8 @@ tests/
 - https://www.youtube.com/watch?v=uquw8yUKaYM
 
 ---
+
+<br>
 
 <div align="center">
 
