@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guía: programar con IA paso a paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F5; --surface:#FFFFFF; --ink:#17323F; --muted:#56666E; --rule:#D3DCD9;
+  --done:#2E7D5B; --done-soft:#E1F0E8; --mark:#F0B23A; --mark-soft:#FDF2DA; --info-soft:#E4EEF4;
+  --code-bg:#17323F; --code-ink:#E8F0EE;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1E25; --surface:#16272F; --ink:#E6EEEC; --muted:#9FB0B5; --rule:#2B3F47;
+    --done:#5FBF8F; --done-soft:#1C3A2E; --mark:#F0B23A; --mark-soft:#3A3020; --info-soft:#1D3340;
+    --code-bg:#0A161B; --code-ink:#DCE8E5; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1E25; --surface:#16272F; --ink:#E6EEEC; --muted:#9FB0B5; --rule:#2B3F47;
+  --done:#5FBF8F; --done-soft:#1C3A2E; --mark:#F0B23A; --mark-soft:#3A3020; --info-soft:#1D3340;
+  --code-bg:#0A161B; --code-ink:#DCE8E5; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.06rem/1.62 var(--body)}
+img{max-width:100%}
+a{color:inherit;text-decoration-color:var(--mark);text-underline-offset:3px;text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--mark);outline-offset:2px;border-radius:4px}
+
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1180px;margin:0 auto}
+/* Rail: línea de metro con estaciones */
+.rail{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;padding:32px 20px 32px 28px;overflow-y:auto;border-right:1px solid var(--rule)}
+.rail h2{font:700 1rem/1.2 var(--display);margin:0 0 4px}
+.pct{font:800 2.6rem/1 var(--display);letter-spacing:-.02em}
+.pct small{font-size:1rem;font-weight:500;color:var(--muted);margin-left:6px}
+.bar{height:6px;background:var(--rule);border-radius:3px;margin:10px 0 24px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--done);transition:width .4s ease}
+.stations{list-style:none;margin:0;padding:0;position:relative}
+.stations::before{content:"";position:absolute;left:11px;top:12px;bottom:12px;width:3px;background:var(--rule);border-radius:2px}
+.stations li{position:relative;padding-left:36px;margin-bottom:6px}
+.stations a{display:block;text-decoration:none;padding:5px 6px;border-radius:6px;font-size:.93rem;line-height:1.3}
+.stations a:hover{background:var(--surface)}
+.dot{position:absolute;left:3px;top:6px;width:19px;height:19px;border-radius:50%;background:var(--paper);border:3px solid var(--rule);display:grid;place-items:center;font:700 .62rem/1 var(--display);color:var(--muted)}
+.stations li.partial .dot{border-color:var(--mark)}
+.stations li.complete .dot{border-color:var(--done);background:var(--done);color:#fff}
+.rail-tools{margin-top:24px;display:flex;flex-direction:column;gap:8px}
+.btn{font:700 .9rem/1 var(--body);padding:10px 12px;border-radius:8px;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.btn:hover{border-color:var(--ink)}
+
+main{padding:40px clamp(18px,4vw,56px) 80px;min-width:0}
+.hero h1{font:800 clamp(2.1rem,5vw,3.4rem)/1.04 var(--display);letter-spacing:-.025em;margin:0 0 18px;max-width:16ch}
+.lede{font-size:1.18rem;max-width:62ch;color:var(--muted);margin:0 0 24px}
+.howto{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 22px;max-width:70ch}
+.howto p{margin:.3em 0}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.92rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+
+section.step{margin-top:64px;max-width:72ch}
+.step-head{display:flex;gap:16px;align-items:flex-start}
+.num{flex:none;font:800 3.2rem/0.9 var(--display);color:var(--rule);min-width:1.4em;letter-spacing:-.04em}
+.step.complete .num{color:var(--done)}
+.step h2{font:700 clamp(1.5rem,3vw,1.95rem)/1.15 var(--display);margin:4px 0 6px;letter-spacing:-.01em}
+.oneliner{margin:0;color:var(--muted);font-size:1.05rem}
+.step h3{font:700 1.08rem/1.3 var(--display);margin:28px 0 8px}
+.step ol,.step ul{padding-left:1.3em}
+.step li{margin:.35em 0}
+kbd{font:600 .85em var(--mono);background:var(--surface);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:1px 5px}
+code{font:400 .88em var(--mono);background:var(--info-soft);padding:1px 5px;border-radius:4px}
+
+.note{border-radius:10px;padding:14px 18px;margin:18px 0;font-size:.98rem}
+.note strong:first-child{display:block;font-family:var(--display);margin-bottom:2px}
+.note.free{background:var(--mark-soft);border-left:4px solid var(--mark)}
+.note.why{background:var(--info-soft);border-left:4px solid var(--ink)}
+.note.warn{background:var(--surface);border:1.5px dashed var(--mark)}
+
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+.tbl{overflow-x:auto;margin:14px 0}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--display);font-weight:700}
+
+.code{position:relative;margin:14px 0}
+.code pre{margin:0;background:var(--code-bg);color:var(--code-ink);font:400 .84rem/1.55 var(--mono);padding:18px 18px;border-radius:10px;overflow-x:auto;white-space:pre}
+.code .label{font:700 .8rem var(--display);color:var(--muted);margin-bottom:6px}
+.copy{position:absolute;top:30px;right:10px;font:700 .78rem var(--body);padding:5px 9px;border-radius:6px;border:1px solid #3d5966;background:#21414f;color:#E8F0EE;cursor:pointer}
+
+/* Esquemas de pantalla */
+.mock{border:1.5px solid var(--rule);border-radius:12px;background:var(--surface);margin:16px 0;overflow:hidden;font-size:.9rem}
+.mock-bar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--rule);background:var(--paper)}
+.mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--rule);display:inline-block}
+.mock-bar span{margin-left:8px;font:400 .78rem var(--mono);color:var(--muted)}
+.mock-body{display:grid;grid-template-columns:150px 1fr;min-height:180px}
+.mock-side{border-right:1px solid var(--rule);padding:12px}
+.mock-side div{padding:6px 8px;border-radius:6px;color:var(--muted)}
+.mock-side div.on{background:var(--info-soft);color:var(--ink);font-weight:700}
+.mock-main{padding:14px 16px}
+.mock-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule);gap:10px}
+.pill{font:700 .75rem var(--body);padding:4px 10px;border-radius:20px;border:1.5px solid var(--ink);white-space:nowrap}
+.pill.ok{border-color:var(--done);color:var(--done)}
+.hl{outline:3px solid var(--mark);outline-offset:2px;border-radius:6px}
+.cap{font-size:.82rem;color:var(--muted);padding:8px 12px;border-top:1px solid var(--rule)}
+@media (max-width:560px){.mock-body{grid-template-columns:1fr}.mock-side{display:none}}
+
+/* Checklists */
+.checks{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:6px 18px 12px;margin:22px 0}
+.checks h4{font:700 .95rem var(--display);margin:12px 0 4px;color:var(--muted)}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:8px 0;cursor:pointer;border-bottom:1px solid var(--rule)}
+.checks label:last-child{border-bottom:0}
+.checks input{appearance:none;flex:none;width:22px;height:22px;margin-top:2px;border:2px solid var(--muted);border-radius:6px;display:grid;place-items:center;cursor:pointer;background:var(--paper)}
+.checks input:checked{background:var(--done);border-color:var(--done)}
+.checks input:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.checks input:checked + span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--done)}
+.checks.verify input:checked + span{text-decoration:none;color:var(--done)}
+
+details{border:1px solid var(--rule);border-radius:10px;background:var(--surface);margin:12px 0;padding:0 16px}
+summary{cursor:pointer;font:700 1rem var(--display);padding:12px 0}
+dl{margin:0 0 14px}
+dt{font-weight:700;margin-top:10px}
+dd{margin:0;color:var(--muted)}
+
+.mobile-progress{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .rail{display:none}
+  .mobile-progress{display:flex;position:sticky;top:0;z-index:5;gap:12px;align-items:center;padding:10px 18px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:1px solid var(--rule)}
+  .mobile-progress .bar{flex:1;margin:0}
+  .mobile-progress b{font:800 1.1rem var(--display)}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+  .mobile-progress{top:0}
+}
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--rule);color:var(--muted);font-size:.9rem;max-width:72ch}
+</style>
+</head>
+<body>
+<div class="mobile-progress" aria-hidden="true"><b id="mPct">0%</b><div class="bar"><span id="mBar"></span></div></div>
+<div class="layout">
+<aside class="rail" aria-label="Progreso">
+  <h2>Tu progreso</h2>
+  <div class="pct"><span id="pct">0%</span><small id="count">0 / 0</small></div>
+  <div class="bar"><span id="bar"></span></div>
+  <ol class="stations" id="stations"></ol>
+  <div class="rail-tools">
+    <button class="btn" id="reset" type="button">Empezar de cero</button>
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>Programar con IA, paso a paso</h1>
+  <p class="lede">Una guía para montar un proyecto en el que tú decides qué se construye y la IA escribe el código. No hace falta saber programar para empezar: hace falta orden.</p>
+  <div class="howto">
+    <p><strong>Cómo usar esta guía.</strong> Ve paso a paso, sin saltarte ninguno. Cada paso tiene dos listas: «Hazlo» (lo que tienes que hacer) y «Comprueba» (cómo saber que ha quedado bien). Tus marcas se guardan en este navegador, así que puedes cerrar y volver cuando quieras.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--mark)"></i>Si usas el plan gratuito u otra IA</span>
+      <span><i class="sw" style="background:var(--ink)"></i>Por qué importa</span>
+      <span><i class="sw" style="background:var(--done)"></i>Paso completado</span>
+    </div>
+  </div>
+
+  <details>
+    <summary>Mini diccionario (léelo antes de empezar)</summary>
+    <dl>
+      <dt>Agente de IA</dt><dd>Una IA que no solo conversa: lee tus archivos, escribe código, ejecuta comandos y hace cambios por ti.</dd>
+      <dt>Repositorio (repo)</dt><dd>La carpeta del proyecto con todo su historial de cambios. Vive en GitHub (en internet) y en tu ordenador.</dd>
+      <dt>Clonar</dt><dd>Descargar el repositorio de GitHub a tu ordenador, conectado para poder subir cambios.</dd>
+      <dt>Commit</dt><dd>Un «punto de guardado» con una frase que explica qué cambió. Si algo se rompe, puedes volver a cualquier commit anterior.</dd>
+      <dt>Rama (branch)</dt><dd>Una copia paralela del proyecto para probar algo sin tocar la versión buena (llamada <code>main</code>).</dd>
+      <dt>Pull request (PR)</dt><dd>Una petición para unir una rama a <code>main</code>, revisando antes los cambios.</dd>
+      <dt>Terminal</dt><dd>La ventana donde se escriben comandos. Con agentes de IA casi siempre los escribe la IA y tú solo apruebas.</dd>
+      <dt>Conector (MCP)</dt><dd>Un «enchufe» que deja a la IA usar otro servicio: GitHub, Vercel, Supabase…</dd>
+      <dt>Skill</dt><dd>Un manual de instrucciones que la IA lee cuando hace un tipo de tarea concreto. Es una carpeta con un archivo <code>SKILL.md</code>.</dd>
+      <dt>Spec</dt><dd>Especificación: un documento que describe qué debe hacer una parte del programa y cómo saber si funciona. Se escribe antes del código.</dd>
+      <dt>CLAUDE.md / AGENTS.md</dt><dd>El archivo de normas del proyecto. Es lo primero que lee el agente cada vez que empieza a trabajar.</dd>
+    </dl>
+  </details>
+</header>
+
+<!-- PASO 0 -->
+<section class="step" id="s0" data-title="Cuentas y herramientas">
+  <div class="step-head"><div class="num">0</div><div>
+    <h2>Prepara cuentas y herramientas</h2>
+    <p class="oneliner">Antes de nada, necesitas dónde guardar el proyecto, dónde editarlo y con qué IA trabajar.</p>
+  </div></div>
+
+  <h3>Qué necesitas</h3>
+  <ul>
+    <li><strong>Cuenta de GitHub</strong> (gratis): donde vivirá el proyecto. <a href="https://github.com/signup">github.com/signup</a></li>
+    <li><strong>Cuenta de Claude</strong>: <a href="https://claude.ai">claude.ai</a>.</li>
+    <li><strong>Git</strong>: el programa que guarda el historial. Descárgalo de <a href="https://git-scm.com">git-scm.com</a>. Si prefieres no usar la terminal, instala también <a href="https://desktop.github.com">GitHub Desktop</a>.</li>
+    <li><strong>Un editor de código</strong>: <a href="https://code.visualstudio.com">VS Code</a> es gratis y el más usado.</li>
+    <li><strong>Un agente de IA</strong> que trabaje dentro de tu proyecto (mira la tabla).</li>
+  </ul>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Herramienta</th><th>Coste</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td>Claude Code</td><td>Plan Pro o superior</td><td>El agente de Claude. Es la opción recomendada: sigue muy bien las normas del proyecto, usa skills y conectores, y trabaja de forma ordenada en tareas largas.</td></tr>
+      <tr><td>Claude (chat web)</td><td>Gratis, con límites</td><td>Pensar, escribir specs, revisar ideas. No toca tus archivos directamente.</td></tr>
+      <tr><td>Antigravity, Gemini CLI, GitHub Copilot…</td><td>Tienen modalidades gratuitas</td><td>Agentes alternativos. Todo lo de esta guía (normas, skills, specs, docs) sirve igual con ellos.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note free"><strong>Plan gratuito</strong>Claude Code no está incluido en el plan gratuito de Claude. Combinación recomendada si no pagas: usa el chat de Claude para pensar y escribir las specs, y un agente con modalidad gratuita para ejecutar en tu ordenador. La clave de esta guía no es la herramienta, es el método: si el proyecto está bien documentado, cualquier IA trabaja bien en él.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="0a"><span>Tengo cuenta de GitHub y he iniciado sesión.</span></label>
+    <label><input type="checkbox" data-id="0b"><span>Tengo cuenta de Claude.</span></label>
+    <label><input type="checkbox" data-id="0c"><span>He instalado Git (y GitHub Desktop si no quiero terminal).</span></label>
+    <label><input type="checkbox" data-id="0d"><span>He instalado VS Code.</span></label>
+    <label><input type="checkbox" data-id="0e"><span>He elegido mi agente de IA y lo he instalado.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="0v1"><span>Al escribir <code>git --version</code> en la terminal sale un número de versión (o GitHub Desktop abre y muestra mi cuenta).</span></label>
+    <label><input type="checkbox" data-id="0v2"><span>Mi agente abre y responde a un «hola».</span></label>
+  </div>
+</section>
+
+<!-- PASO 1 -->
+<section class="step" id="s1" data-title="Conectores">
+  <div class="step-head"><div class="num">1</div><div>
+    <h2>Configura los conectores</h2>
+    <p class="oneliner">Dale a la IA acceso a los servicios que usará el proyecto, para que no tengas que copiar y pegar entre ventanas.</p>
+  </div></div>
+
+  <div class="note why"><strong>Por qué importa</strong>Con el conector de GitHub, la IA puede leer tu código; con el de Vercel, publicar la web; con el de Supabase, crear la base de datos. Tú das la orden y ella hace las gestiones.</div>
+
+  <h3>Dónde están en Claude</h3>
+  <ol>
+    <li>Entra en <a href="https://claude.ai">claude.ai</a> y pulsa tu nombre o iniciales, abajo a la izquierda.</li>
+    <li>Abre <strong>Configuración</strong> y busca la sección <strong>Conectores</strong> (en algunas versiones aparece dentro de «Personalizar»).</li>
+    <li>Pulsa <strong>Explorar conectores</strong> (o el botón <kbd>+</kbd>) para ver el directorio completo.</li>
+    <li>En cada servicio pulsa <strong>Conectar</strong>, inicia sesión en ese servicio y acepta los permisos.</li>
+    <li>En un chat, pulsa <kbd>+</kbd> en la caja de texto → <strong>Conectores</strong> y activa los que quieras usar en esa conversación.</li>
+  </ol>
+
+  <div class="mock" role="img" aria-label="Esquema de la pantalla de conectores de Claude">
+    <div class="mock-bar"><i></i><i></i><i></i><span>claude.ai › configuración › conectores</span></div>
+    <div class="mock-body">
+      <div class="mock-side"><div>General</div><div>Perfil</div><div class="on hl">Conectores</div><div>Capacidades</div></div>
+      <div class="mock-main">
+        <div class="mock-row"><strong>Conectores</strong><span class="pill hl">+ Explorar conectores</span></div>
+        <div class="mock-row"><span>GitHub</span><span class="pill ok">Conectado</span></div>
+        <div class="mock-row"><span>Vercel</span><span class="pill">Conectar</span></div>
+        <div class="mock-row"><span>Supabase</span><span class="pill">Conectar</span></div>
+      </div>
+    </div>
+    <div class="cap">Esquema orientativo. Los nombres de los menús cambian con las actualizaciones; lo resaltado en amarillo es dónde tienes que pulsar.</div>
+  </div>
+
+  <h3>Cuáles conectar para un proyecto web típico</h3>
+  <ul>
+    <li><strong>GitHub</strong>: el código. Imprescindible.</li>
+    <li><strong>Vercel</strong>: publicar la web en internet.</li>
+    <li><strong>Supabase</strong>: base de datos y usuarios.</li>
+    <li>Otros según el proyecto: Docker (entornos), Stripe (pagos), Figma o Canva (diseño)…</li>
+  </ul>
+  <p>Dedica diez minutos a explorar el directorio entero: muchas veces hay un conector que te ahorra horas y no sabías que existía.</p>
+
+  <div class="note free"><strong>Plan gratuito u otra IA</strong>En el plan gratuito de Claude hay conectores del directorio disponibles, pero con más límites (por ejemplo, solo un conector personalizado). Otros agentes tienen su propio sistema; busca en su configuración «MCP» o «Integraciones». Si tu herramienta no tiene conectores, no pasa nada: el agente puede usar Git y las webs de cada servicio igualmente.</div>
+
+  <div class="note warn"><strong>Seguridad</strong>Cuando un conector pida permisos, lee qué pide. Para empezar, deja activado que la IA te pregunte antes de hacer cambios.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="1a"><span>He encontrado la sección de conectores.</span></label>
+    <label><input type="checkbox" data-id="1b"><span>He explorado el directorio completo de conectores.</span></label>
+    <label><input type="checkbox" data-id="1c"><span>He conectado GitHub.</span></label>
+    <label><input type="checkbox" data-id="1d"><span>He conectado los demás servicios que necesita mi proyecto (Vercel, Supabase…).</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="1v1"><span>Cada conector aparece como «Conectado».</span></label>
+    <label><input type="checkbox" data-id="1v2"><span>He preguntado a la IA «¿qué repositorios tengo en GitHub?» y me los ha listado.</span></label>
+  </div>
+</section>
+
+<!-- PASO 2 -->
+<section class="step" id="s2" data-title="Repositorio en GitHub">
+  <div class="step-head"><div class="num">2</div><div>
+    <h2>Crea el repositorio en GitHub</h2>
+    <p class="oneliner">El repositorio es la casa del proyecto: todo el código, la documentación y el historial de cambios.</p>
+  </div></div>
+
+  <h3>Público o privado</h3>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Público</th><th>Privado</th></tr></thead>
+    <tbody>
+      <tr><td>Quién lo ve</td><td>Cualquier persona en internet</td><td>Solo tú y quien invites</td></tr>
+      <tr><td>Úsalo para</td><td>Proyectos de portfolio, código abierto, cosas que quieres enseñar</td><td>Proyectos de clientes, ideas de negocio, cualquier cosa con datos o lógica que no quieras compartir</td></tr>
+      <tr><td>Coste</td><td>Gratis</td><td>Gratis</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>En la duda, privado.</strong> Puedes hacerlo público más adelante (Settings → Danger Zone → Change visibility); al revés, si ya lo ha visto alguien, no hay vuelta atrás.</p>
+
+  <h3>Cómo crearlo</h3>
+  <ol>
+    <li>En GitHub, pulsa el <kbd>+</kbd> de arriba a la derecha → <strong>New repository</strong>.</li>
+    <li><strong>Repository name</strong>: nombre corto, en minúsculas y con guiones (ej. <code>agenda-citas</code>).</li>
+    <li><strong>Description</strong>: una frase sobre qué es.</li>
+    <li>Elige <strong>Public</strong> o <strong>Private</strong>.</li>
+    <li>Marca <strong>Add a README file</strong>.</li>
+    <li>En <strong>.gitignore</strong> elige la plantilla de tu tecnología (ej. <em>Node</em>). Esto evita subir archivos que no deben subirse.</li>
+    <li>Pulsa <strong>Create repository</strong>.</li>
+  </ol>
+
+  <div class="mock" role="img" aria-label="Esquema del formulario de nuevo repositorio en GitHub">
+    <div class="mock-bar"><i></i><i></i><i></i><span>github.com/new</span></div>
+    <div class="mock-main">
+      <div class="mock-row"><span>Repository name</span><span class="pill hl">agenda-citas</span></div>
+      <div class="mock-row"><span>◯ Public &nbsp; ◉ Private</span><span class="pill hl">Privado si dudas</span></div>
+      <div class="mock-row"><span>☑ Add a README file</span><span></span></div>
+      <div class="mock-row"><span>.gitignore template</span><span class="pill">Node</span></div>
+      <div class="mock-row"><span></span><span class="pill ok">Create repository</span></div>
+    </div>
+    <div class="cap">Esquema orientativo del formulario de GitHub.</div>
+  </div>
+
+  <div class="note warn"><strong>Regla de oro: nunca subas contraseñas ni claves</strong>Las claves de Supabase, Stripe, etc. van en un archivo <code>.env</code> que está en el <code>.gitignore</code>. Aunque el repo sea privado. Si algún día subes una por error, cámbiala en el servicio: borrarla del código no basta.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="2a"><span>He decidido si el repo es público o privado (y sé por qué).</span></label>
+    <label><input type="checkbox" data-id="2b"><span>He creado el repositorio con README y .gitignore.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="2v1"><span>Veo el repo en mi perfil de GitHub con la etiqueta correcta (Public / Private).</span></label>
+    <label><input type="checkbox" data-id="2v2"><span>Dentro hay un <code>README.md</code> y un <code>.gitignore</code>.</span></label>
+  </div>
+</section>
+
+<!-- PASO 3 -->
+<section class="step" id="s3" data-title="Clonar y CLAUDE.md">
+  <div class="step-head"><div class="num">3</div><div>
+    <h2>Clona el repo y crea el CLAUDE.md</h2>
+    <p class="oneliner">Baja el proyecto a tu ordenador y escribe las normas que la IA seguirá siempre.</p>
+  </div></div>
+
+  <h3>Clonar</h3>
+  <ol>
+    <li>En la página del repo pulsa el botón verde <strong>Code</strong> y copia la dirección HTTPS.</li>
+    <li>Con GitHub Desktop: <strong>File → Clone repository</strong>, pega la dirección y elige carpeta.</li>
+    <li>Con terminal: ve a tu carpeta de proyectos y escribe:</li>
+  </ol>
+  <div class="code"><pre>git clone https://github.com/TU-USUARIO/agenda-citas.git
+cd agenda-citas</pre></div>
+  <p>Abre esa carpeta en VS Code (<strong>File → Open Folder</strong>) y arranca tu agente dentro de ella.</p>
+
+  <h3>El CLAUDE.md</h3>
+  <p>Es el reglamento del proyecto. El agente lo lee al empezar cada sesión, así no tienes que repetirle cómo trabajar. Va en la raíz del proyecto (la carpeta principal).</p>
+  <p>Truco: en Claude Code, el comando <code>/init</code> analiza el proyecto y crea un primer CLAUDE.md. Después lo ajustas con esta plantilla:</p>
+
+  <div class="code"><div class="label">CLAUDE.md (plantilla inicial)</div><button class="copy" type="button">Copiar</button><pre># Proyecto: [nombre]
+
+## Qué es
+[Una o dos frases: qué hace la aplicación y para quién es.]
+
+## Tecnologías
+- [Ej: Next.js, Supabase, desplegado en Vercel]
+
+## Cómo trabajar en este proyecto
+- Antes de programar algo, lee la spec correspondiente en /specs.
+- Si no existe spec para lo que te pido, propónmela primero y espera mi aprobación.
+- Trabaja en tareas pequeñas. Al terminar cada una, resume qué has cambiado.
+- No borres archivos ni instales dependencias nuevas sin preguntarme.
+- Nunca escribas claves o contraseñas en el código: usa variables en .env.
+- Si algo no está claro, pregunta antes de suponer.
+
+## Documentación que debes mantener al día
+- SPECS.md: índice de funcionalidades y su estado.
+- DESIGN.md: diseño visual y decisiones de interfaz.
+- docs/decisions/: una nota por cada decisión importante (qué, por qué, alternativas).
+- CHANGELOG.md: resumen de cambios por versión.
+
+## Tests
+- Cada funcionalidad nueva lleva sus tests.
+- Antes de dar algo por terminado, ejecuta los tests y dime el resultado.
+
+## Commits
+- Mensajes en español con formato: tipo: descripción corta
+  (tipos: feat, fix, docs, test, refactor, chore).
+- Un commit por cambio lógico. Nunca subas directamente a main.
+
+## Skills
+[Se rellena en el paso 5]</pre></div>
+
+  <div class="note free"><strong>Si usas otra IA</strong>Cada agente busca su archivo de normas con un nombre propio (CLAUDE.md, AGENTS.md, GEMINI.md…). <code>AGENTS.md</code> es el estándar que entienden cada vez más herramientas. Mantén un único contenido y pide a la IA: «crea un AGENTS.md que diga que las normas están en CLAUDE.md» (o al revés). Así cualquier IA que entre al proyecto sabe cómo trabajar.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="3a"><span>He clonado el repositorio en mi ordenador.</span></label>
+    <label><input type="checkbox" data-id="3b"><span>He abierto la carpeta en VS Code y arrancado el agente dentro.</span></label>
+    <label><input type="checkbox" data-id="3c"><span>He creado el CLAUDE.md en la raíz y lo he adaptado a mi proyecto.</span></label>
+    <label><input type="checkbox" data-id="3d"><span>(Si uso varias IAs) He creado también el AGENTS.md.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="3v1"><span>He preguntado al agente «¿cuáles son las normas de este proyecto?» y me las ha resumido bien.</span></label>
+    <label><input type="checkbox" data-id="3v2"><span>El CLAUDE.md no contiene ninguna clave ni contraseña.</span></label>
+  </div>
+</section>
+
+<!-- PASO 4 -->
+<section class="step" id="s4" data-title="Skills">
+  <div class="step-head"><div class="num">4</div><div>
+    <h2>Añade skills para tu proyecto</h2>
+    <p class="oneliner">Las skills son manuales especializados: la IA los consulta solo cuando hace ese tipo de tarea.</p>
+  </div></div>
+
+  <div class="note why"><strong>Diferencia con el CLAUDE.md</strong>El CLAUDE.md son normas generales que se leen siempre. Una skill es un manual concreto («cómo diseñamos pantallas», «cómo escribimos tests») que solo se carga cuando hace falta. Así la IA no se satura de instrucciones.</div>
+
+  <h3>Cómo encontrar skills útiles</h3>
+  <p>Pide recomendaciones a otra IA (ChatGPT, el chat de Claude…) describiendo tu proyecto. Copia este mensaje:</p>
+  <div class="code"><div class="label">Mensaje para pedir recomendaciones</div><button class="copy" type="button">Copiar</button><pre>Voy a desarrollar [describe el proyecto en 2-3 frases] usando [tecnologías].
+Trabajo con agentes de IA y skills (carpetas con un SKILL.md).
+Recomiéndame 5-8 skills útiles para este proyecto. Para cada una dime:
+- nombre
+- para qué sirve
+- si existe ya en algún repositorio público (con enlace) o si debo crearla.
+No inventes enlaces: si no estás seguro de que exista, dilo.</pre></div>
+  <p>Busca también en el repositorio oficial de skills de Anthropic en GitHub (<code>anthropics/skills</code>) y revisa siempre una skill antes de instalarla: es un texto que la IA va a obedecer.</p>
+
+  <h3>Crear tu propia skill</h3>
+  <p>Una skill es una carpeta con un archivo <code>SKILL.md</code>. La recomendada para empezar es una de <strong>coherencia visual</strong>, para que todas las pantallas se vean iguales:</p>
+  <div class="code"><div class="label">.claude/skills/consistencia-visual/SKILL.md</div><button class="copy" type="button">Copiar</button><pre>---
+name: consistencia-visual
+description: Reglas de diseño del proyecto (colores, tipografía, espaciados, componentes). Úsala siempre que crees o modifiques cualquier pantalla o componente visual.
+---
+
+# Consistencia visual
+
+## Colores
+- Principal: #XXXXXX (botones y enlaces)
+- Fondo: #XXXXXX
+- Texto: #XXXXXX
+- Error: #XXXXXX
+
+## Tipografía
+- Fuente: [nombre]
+- Títulos: [tamaño y grosor]
+- Texto normal: [tamaño]
+
+## Componentes
+- Usa siempre los componentes de /components antes de crear uno nuevo.
+- Botones: esquinas redondeadas de 8px, altura mínima 44px.
+
+## Reglas
+- No inventes colores nuevos: usa solo los de esta lista.
+- Toda pantalla debe verse bien en móvil.
+- Si necesitas algo que no está aquí, pregúntame y actualiza este archivo.</pre></div>
+  <p>Lo más importante es la línea <code>description</code>: la IA decide si usa la skill leyendo esa frase. Escríbela diciendo <em>cuándo</em> usarla.</p>
+
+  <h3>Dónde se instalan</h3>
+  <ul>
+    <li><strong>Dentro del proyecto</strong> (recomendado): <code>.claude/skills/[nombre]/SKILL.md</code>. Así viajan con el repositorio y cualquiera que lo clone las tiene.</li>
+    <li><strong>En el chat de Claude</strong>: Configuración → Capacidades (o Personalizar) → <strong>Skills</strong> → subir la carpeta comprimida en .zip. Necesita tener activada la ejecución de código.</li>
+  </ul>
+  <div class="mock" role="img" aria-label="Esquema de la estructura de carpetas con skills">
+    <div class="mock-bar"><i></i><i></i><i></i><span>estructura del proyecto</span></div>
+    <div class="code" style="margin:0"><pre style="border-radius:0">agenda-citas/
+├── CLAUDE.md
+├── .claude/
+│   └── skills/
+│       ├── consistencia-visual/
+│       │   └── SKILL.md
+│       └── tests/
+│           └── SKILL.md
+└── README.md</pre></div>
+  </div>
+
+  <div class="note free"><strong>Otras IAs</strong>El formato de skills (carpeta + SKILL.md) es un estándar abierto y otros agentes lo están adoptando. Si tu herramienta no lo soporta, añade en tu AGENTS.md: «Antes de hacer una tarea, revisa si hay una skill relacionada en .claude/skills y síguela». Funciona igual.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="4a"><span>He pedido recomendaciones de skills describiendo mi proyecto.</span></label>
+    <label><input type="checkbox" data-id="4b"><span>He revisado e instalado las skills que me sirven.</span></label>
+    <label><input type="checkbox" data-id="4c"><span>He creado mi skill de consistencia visual con mis colores y fuentes reales.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="4v1"><span>Cada skill tiene su carpeta y dentro un <code>SKILL.md</code> que empieza con <code>name</code> y <code>description</code>.</span></label>
+    <label><input type="checkbox" data-id="4v2"><span>He preguntado al agente «¿qué skills tienes disponibles?» y aparecen las mías.</span></label>
+  </div>
+</section>
+
+<!-- PASO 5 -->
+<section class="step" id="s5" data-title="CLAUDE.md con skills">
+  <div class="step-head"><div class="num">5</div><div>
+    <h2>Dile al CLAUDE.md cuándo usar cada skill</h2>
+    <p class="oneliner">Las skills funcionan solas, pero indicarlo explícitamente evita que la IA se las salte.</p>
+  </div></div>
+  <p>Sustituye la sección «Skills» del CLAUDE.md por algo así:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>## Skills
+- consistencia-visual: OBLIGATORIA al crear o modificar cualquier pantalla,
+  componente o estilo.
+- tests: al crear o cambiar cualquier funcionalidad.
+- [otra-skill]: [cuándo usarla].
+
+Si una tarea encaja con una skill, léela antes de empezar.
+Si una skill se queda corta o desactualizada, propón el cambio.</pre></div>
+  <p>Truco: en lugar de escribirlo tú, pide al agente «actualiza la sección Skills del CLAUDE.md con las skills instaladas y cuándo usar cada una». Luego revisa lo que ha escrito.</p>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="5a"><span>He actualizado la sección «Skills» del CLAUDE.md.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="5v1"><span>He pedido un cambio visual pequeño y el agente ha dicho que usaba la skill de consistencia visual.</span></label>
+  </div>
+</section>
+
+<!-- PASO 6 -->
+<section class="step" id="s6" data-title="Specs antes de código">
+  <div class="step-head"><div class="num">6</div><div>
+    <h2>Escribe las specs antes del código</h2>
+    <p class="oneliner">Primero se decide qué se construye; después se construye. Es el paso que más tiempo ahorra.</p>
+  </div></div>
+
+  <div class="note why"><strong>Por qué importa</strong>Una IA sin specs rellena los huecos inventando. Con specs claras, sabe exactamente qué hacer y tú sabes exactamente qué comprobar. A esto se le llama Spec-Driven Development: la especificación manda y el código la cumple.</div>
+
+  <h3>Cómo hacerlo con la IA</h3>
+  <ol>
+    <li><strong>Deja que la IA te entreviste.</strong> No le pidas el plan directamente; pídele que te pregunte.</li>
+    <li><strong>Escribe los documentos base</strong> con lo que salga de la entrevista.</li>
+    <li><strong>Divide en specs por funcionalidad</strong>, cada una con criterios de aceptación.</li>
+    <li><strong>Revisa y aprueba</strong> cada spec antes de pasar al paso 7.</li>
+  </ol>
+  <div class="code"><div class="label">Mensaje para empezar</div><button class="copy" type="button">Copiar</button><pre>Quiero hacer [idea en 2-3 frases].
+Antes de escribir nada, hazme preguntas una a una para entender bien
+qué necesito: usuarios, funcionalidades, qué es imprescindible y qué puede
+esperar, diseño y límites. Cuando lo tengas claro, propón:
+1. SPECS.md con la lista de funcionalidades priorizadas.
+2. DESIGN.md con el estilo visual.
+3. Una spec por funcionalidad en /specs con criterios de aceptación.</pre></div>
+
+  <h3>Qué documentos debes tener</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Archivo</th><th>Qué contiene</th></tr></thead>
+    <tbody>
+      <tr><td><code>SPECS.md</code></td><td>Visión general: qué es la app, para quién, lista de funcionalidades con prioridad y estado (pendiente / en curso / hecha).</td></tr>
+      <tr><td><code>DESIGN.md</code></td><td>Estilo visual, pantallas principales y cómo se navega entre ellas.</td></tr>
+      <tr><td><code>specs/[funcionalidad].md</code></td><td>Una por funcionalidad: qué hace, pasos del usuario, casos raros, criterios de aceptación y lista de tareas.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><div class="label">specs/reservar-cita.md (ejemplo de estructura)</div><button class="copy" type="button">Copiar</button><pre># Reservar cita
+
+## Objetivo
+El cliente puede reservar una cita libre desde el móvil en menos de un minuto.
+
+## Flujo
+1. Elige servicio.
+2. Ve los huecos libres de los próximos 14 días.
+3. Elige hueco, deja nombre y teléfono, confirma.
+
+## Casos especiales
+- Dos personas eligen el mismo hueco a la vez: solo la primera lo consigue.
+- No hay huecos libres: mostrar mensaje y la siguiente fecha disponible.
+
+## Criterios de aceptación
+- [ ] No se puede reservar un hueco ya ocupado.
+- [ ] El teléfono se valida antes de confirmar.
+- [ ] El cliente ve una confirmación con fecha y hora.
+
+## Tareas
+- [ ] Tabla de citas en la base de datos
+- [ ] Pantalla de selección de hueco
+- [ ] Confirmación</pre></div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="6a"><span>He hecho la «entrevista» con la IA hasta tener la idea clara.</span></label>
+    <label><input type="checkbox" data-id="6b"><span>Tengo SPECS.md y DESIGN.md.</span></label>
+    <label><input type="checkbox" data-id="6c"><span>Tengo una spec en /specs por cada funcionalidad imprescindible.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="6v1"><span>Cada spec tiene criterios de aceptación que podría comprobar yo misma sin saber programar.</span></label>
+    <label><input type="checkbox" data-id="6v2"><span>Si se lo explico a alguien con las specs en la mano, lo entiende.</span></label>
+    <label><input type="checkbox" data-id="6v3"><span>He hecho commit de los documentos (los specs también se guardan en el repo).</span></label>
+  </div>
+</section>
+
+<!-- PASO 7 -->
+<section class="step" id="s7" data-title="Generar código">
+  <div class="step-head"><div class="num">7</div><div>
+    <h2>Genera el código, tarea a tarea</h2>
+    <p class="oneliner">Ahora sí: la IA programa. Tu papel es dirigir, revisar y probar.</p>
+  </div></div>
+  <h3>El ciclo de trabajo</h3>
+  <ol>
+    <li><strong>Elige una sola tarea</strong> de una spec. Nunca «hazme la app entera».</li>
+    <li><strong>Pide un plan primero.</strong> En Claude Code existe el modo plan (<kbd>Shift</kbd>+<kbd>Tab</kbd>): la IA explica qué hará sin tocar nada. Con otra IA, pídeselo: «explícame el plan y espera mi OK».</li>
+    <li><strong>Aprueba o corrige</strong> el plan.</li>
+    <li><strong>Deja que lo haga</strong> y lee el resumen de cambios.</li>
+    <li><strong>Pruébalo tú</strong>: abre la app y comprueba los criterios de aceptación.</li>
+    <li><strong>Commit</strong> (paso 9) y marca la tarea como hecha en la spec.</li>
+  </ol>
+  <div class="code"><div class="label">Mensaje tipo</div><button class="copy" type="button">Copiar</button><pre>Lee specs/reservar-cita.md. Vamos a hacer solo la tarea
+"Pantalla de selección de hueco". Primero explícame el plan
+y espera mi aprobación antes de tocar código.</pre></div>
+  <div class="note why"><strong>Conversaciones cortas</strong>Cuando una conversación se alarga mucho, la IA empieza a olvidar detalles. Al terminar una tarea, empieza una conversación nueva (en Claude Code, <code>/clear</code>). Como todo está documentado, no se pierde nada.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="7a"><span>He completado mi primera tarea siguiendo el ciclo completo.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="7v1"><span>La IA me pidió aprobación del plan antes de programar.</span></label>
+    <label><input type="checkbox" data-id="7v2"><span>He probado yo misma el resultado contra los criterios de aceptación.</span></label>
+  </div>
+</section>
+
+<!-- PASO 8 -->
+<section class="step" id="s8" data-title="Tests y documentación">
+  <div class="step-head"><div class="num">8</div><div>
+    <h2>Mantén tests y documentación al día</h2>
+    <p class="oneliner">Es la memoria del proyecto. Sin ella, la siguiente IA (o tú en un mes) va a ciegas.</p>
+  </div></div>
+  <ul>
+    <li><strong>Tests</strong>: pequeños programas que comprueban automáticamente que todo sigue funcionando. Cada funcionalidad lleva los suyos. Pide: «ejecuta todos los tests y dime el resultado».</li>
+    <li><strong>Specs actualizadas</strong>: si algo cambia mientras programáis, se cambia también en la spec.</li>
+    <li><strong>Decisiones</strong>: cada decisión importante («usamos Supabase en vez de Firebase porque…») en una nota en <code>docs/decisions/</code>.</li>
+    <li><strong>CHANGELOG.md</strong>: qué cambió en cada versión, en lenguaje sencillo.</li>
+  </ul>
+  <div class="code"><div class="label">Mensaje al terminar cada tarea</div><button class="copy" type="button">Copiar</button><pre>Antes de cerrar esta tarea:
+1. Ejecuta los tests y dime si pasan.
+2. Actualiza la spec y SPECS.md con el estado real.
+3. Si hemos tomado alguna decisión importante, documéntala en docs/decisions/.
+4. Añade el cambio al CHANGELOG.md.</pre></div>
+  <p>Consejo: añade esta lista al CLAUDE.md como «Definición de terminado». Así la IA lo hará sin que se lo pidas.</p>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="8a"><span>Mi proyecto tiene tests y sé pedir que se ejecuten.</span></label>
+    <label><input type="checkbox" data-id="8b"><span>Existe la carpeta docs/decisions/ y el CHANGELOG.md.</span></label>
+    <label><input type="checkbox" data-id="8c"><span>He añadido la «Definición de terminado» al CLAUDE.md.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="8v1"><span>Prueba de fuego: abro una conversación nueva, pregunto «explícame cómo funciona este proyecto y en qué punto está», y la respuesta es correcta.</span></label>
+  </div>
+</section>
+
+<!-- PASO 9 -->
+<section class="step" id="s9" data-title="Commits y ramas">
+  <div class="step-head"><div class="num">9</div><div>
+    <h2>Gestiona commits y ramas con la IA</h2>
+    <p class="oneliner">Guardar bien es lo que te permite deshacer cualquier error.</p>
+  </div></div>
+  <h3>Forma de trabajar</h3>
+  <ol>
+    <li>Para cada funcionalidad, una <strong>rama</strong> nueva: «crea una rama para la funcionalidad reservar-cita».</li>
+    <li>Al acabar cada tarea, <strong>commit</strong>: «revisa los cambios, muéstrame un resumen y haz commit con un mensaje claro».</li>
+    <li>Al acabar la funcionalidad, <strong>pull request</strong>: «sube la rama y abre un pull request con resumen de cambios».</li>
+    <li>Revisa el PR en GitHub y, si está bien, únelo a <code>main</code> (botón <strong>Merge</strong>).</li>
+  </ol>
+  <div class="code"><div class="label">Ejemplos de buenos mensajes de commit</div><pre>feat: pantalla de selección de hueco
+fix: no permitía reservar el último hueco del día
+docs: decisión de usar Supabase para autenticación
+test: tests de validación de teléfono</pre></div>
+  <div class="note warn"><strong>Antes de aprobar un commit</strong>Mira la lista de archivos que cambian. Si aparece un <code>.env</code> o algo que no esperabas, para y pregunta.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="9a"><span>He trabajado una funcionalidad en su propia rama.</span></label>
+    <label><input type="checkbox" data-id="9b"><span>He hecho commits con la IA y mensajes claros.</span></label>
+    <label><input type="checkbox" data-id="9c"><span>He abierto y unido mi primer pull request.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="9v1"><span>En GitHub, el historial de commits se entiende leyendo solo los mensajes.</span></label>
+    <label><input type="checkbox" data-id="9v2"><span>Nunca he subido cambios directamente a <code>main</code>.</span></label>
+  </div>
+</section>
+
+<!-- PASO 10 -->
+<section class="step" id="s10" data-title="Publicar">
+  <div class="step-head"><div class="num">10</div><div>
+    <h2>Publica el proyecto</h2>
+    <p class="oneliner">Que la app esté en internet y se actualice sola con cada cambio.</p>
+  </div></div>
+  <ol>
+    <li>En Vercel, importa el repositorio de GitHub (o pídeselo a la IA con el conector).</li>
+    <li>Añade las <strong>variables de entorno</strong> (las claves del .env) en la configuración del proyecto en Vercel, nunca en el código.</li>
+    <li>Desde ese momento, cada vez que unas algo a <code>main</code>, la web se actualiza sola. Cada pull request genera además una versión de prueba con su propio enlace.</li>
+  </ol>
+  <div class="note free"><strong>Plan gratuito</strong>Vercel y Supabase tienen planes gratuitos suficientes para aprender y para proyectos personales. Revisa sus condiciones si el proyecto es comercial.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="10a"><span>He conectado el repo a Vercel y configurado las variables de entorno.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="10v1"><span>La web abre desde el móvil con su enlace público.</span></label>
+    <label><input type="checkbox" data-id="10v2"><span>Un cambio unido a main aparece publicado a los pocos minutos.</span></label>
+  </div>
+</section>
+
+<!-- PASO 11 -->
+<section class="step" id="s11" data-title="Si algo sale mal">
+  <div class="step-head"><div class="num">11</div><div>
+    <h2>Si algo sale mal</h2>
+    <p class="oneliner">Pasará. Con commits y documentación, nada es grave.</p>
+  </div></div>
+  <ul>
+    <li><strong>La IA da vueltas sin arreglarlo</strong>: para, abre una conversación nueva y explica el problema desde cero, señalando la spec.</li>
+    <li><strong>Se ha roto algo que funcionaba</strong>: «vuelve los archivos al estado del último commit» o «revierte el commit X».</li>
+    <li><strong>La IA ignora las normas</strong>: recuérdale «lee el CLAUDE.md» y, si se repite, haz esa norma más clara en el archivo.</li>
+    <li><strong>No entiendes lo que ha hecho</strong>: «explícame este cambio como si no supiera programar». Nunca apruebes algo que no entiendes.</li>
+  </ul>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="11v1"><span>Sé cómo volver al último commit si algo se rompe.</span></label>
+    <label><input type="checkbox" data-id="11v2"><span>Sé que puedo empezar una conversación nueva sin perder nada.</span></label>
+  </div>
+</section>
+
+<footer>
+  <p>Los menús de Claude, GitHub y Vercel cambian con frecuencia. Si un botón no está donde dice esta guía, busca la palabra clave (Conectores, Skills, New repository) o pregúntale a la propia IA dónde está.</p>
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var KEY='guia-ia-checks-v1';
+  var state={};
+  try{ state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+
+  var boxes=[].slice.call(document.querySelectorAll('.checks input[type=checkbox]'));
+  var steps=[].slice.call(document.querySelectorAll('section.step'));
+  var list=document.getElementById('stations');
+
+  steps.forEach(function(s,i){
+    var li=document.createElement('li');
+    li.innerHTML='<span class="dot">'+i+'</span><a href="#'+s.id+'"></a>';
+    li.querySelector('a').textContent=s.dataset.title;
+    list.appendChild(li);
+  });
+
+  boxes.forEach(function(b){
+    b.checked=!!state[b.dataset.id];
+    b.addEventListener('change',function(){ state[b.dataset.id]=b.checked; save(); render(); });
+  });
+
+  function render(){
+    var done=boxes.filter(function(b){return b.checked}).length;
+    var pct=boxes.length?Math.round(done/boxes.length*100):0;
+    document.getElementById('pct').textContent=pct+'%';
+    document.getElementById('count').textContent=done+' / '+boxes.length;
+    document.getElementById('bar').style.width=pct+'%';
+    document.getElementById('mPct').textContent=pct+'%';
+    document.getElementById('mBar').style.width=pct+'%';
+    steps.forEach(function(s,i){
+      var bs=[].slice.call(s.querySelectorAll('.checks input'));
+      var d=bs.filter(function(b){return b.checked}).length;
+      var li=list.children[i];
+      li.classList.toggle('complete',d===bs.length&&bs.length>0);
+      li.classList.toggle('partial',d>0&&d<bs.length);
+      s.classList.toggle('complete',d===bs.length&&bs.length>0);
+    });
+  }
+  render();
+
+  document.getElementById('reset').addEventListener('click',function(){
+    if(!confirm('¿Borrar todas las marcas y empezar de cero?'))return;
+    state={}; save(); boxes.forEach(function(b){b.checked=false}); render();
+  });
+
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var pre=btn.parentNode.querySelector('pre');
+      var txt=pre?pre.innerText:'';
+      function ok(){ btn.textContent='Copiado'; setTimeout(function(){btn.textContent='Copiar'},1500); }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(ok,function(){ fallback(); });
+      } else fallback();
+      function fallback(){
+        var t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select();
+        try{document.execCommand('copy'); ok();}catch(e){ btn.textContent='Selecciona y copia'; }
+        document.body.removeChild(t);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

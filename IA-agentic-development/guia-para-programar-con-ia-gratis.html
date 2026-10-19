@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guía: programar con IA gratis (OpenCode + Warp)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F5; --surface:#FFFFFF; --ink:#17323F; --muted:#56666E; --rule:#D3DCD9;
+  --done:#2E7D5B; --done-soft:#E1F0E8; --mark:#F0B23A; --mark-soft:#FDF2DA; --info-soft:#E4EEF4;
+  --code-bg:#17323F; --code-ink:#E8F0EE;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1E25; --surface:#16272F; --ink:#E6EEEC; --muted:#9FB0B5; --rule:#2B3F47;
+    --done:#5FBF8F; --done-soft:#1C3A2E; --mark:#F0B23A; --mark-soft:#3A3020; --info-soft:#1D3340;
+    --code-bg:#0A161B; --code-ink:#DCE8E5; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1E25; --surface:#16272F; --ink:#E6EEEC; --muted:#9FB0B5; --rule:#2B3F47;
+  --done:#5FBF8F; --done-soft:#1C3A2E; --mark:#F0B23A; --mark-soft:#3A3020; --info-soft:#1D3340;
+  --code-bg:#0A161B; --code-ink:#DCE8E5; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.06rem/1.62 var(--body)}
+img{max-width:100%}
+a{color:inherit;text-decoration-color:var(--mark);text-underline-offset:3px;text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--mark);outline-offset:2px;border-radius:4px}
+
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1180px;margin:0 auto}
+/* Rail: línea de metro con estaciones */
+.rail{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;padding:32px 20px 32px 28px;overflow-y:auto;border-right:1px solid var(--rule)}
+.rail h2{font:700 1rem/1.2 var(--display);margin:0 0 4px}
+.pct{font:800 2.6rem/1 var(--display);letter-spacing:-.02em}
+.pct small{font-size:1rem;font-weight:500;color:var(--muted);margin-left:6px}
+.bar{height:6px;background:var(--rule);border-radius:3px;margin:10px 0 24px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--done);transition:width .4s ease}
+.stations{list-style:none;margin:0;padding:0;position:relative}
+.stations::before{content:"";position:absolute;left:11px;top:12px;bottom:12px;width:3px;background:var(--rule);border-radius:2px}
+.stations li{position:relative;padding-left:36px;margin-bottom:6px}
+.stations a{display:block;text-decoration:none;padding:5px 6px;border-radius:6px;font-size:.93rem;line-height:1.3}
+.stations a:hover{background:var(--surface)}
+.dot{position:absolute;left:3px;top:6px;width:19px;height:19px;border-radius:50%;background:var(--paper);border:3px solid var(--rule);display:grid;place-items:center;font:700 .62rem/1 var(--display);color:var(--muted)}
+.stations li.partial .dot{border-color:var(--mark)}
+.stations li.complete .dot{border-color:var(--done);background:var(--done);color:#fff}
+.rail-tools{margin-top:24px;display:flex;flex-direction:column;gap:8px}
+.btn{font:700 .9rem/1 var(--body);padding:10px 12px;border-radius:8px;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.btn:hover{border-color:var(--ink)}
+
+main{padding:40px clamp(18px,4vw,56px) 80px;min-width:0}
+.hero h1{font:800 clamp(2.1rem,5vw,3.4rem)/1.04 var(--display);letter-spacing:-.025em;margin:0 0 18px;max-width:16ch}
+.lede{font-size:1.18rem;max-width:62ch;color:var(--muted);margin:0 0 24px}
+.howto{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 22px;max-width:70ch}
+.howto p{margin:.3em 0}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.92rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+
+section.step{margin-top:64px;max-width:72ch}
+.step-head{display:flex;gap:16px;align-items:flex-start}
+.num{flex:none;font:800 3.2rem/0.9 var(--display);color:var(--rule);min-width:1.4em;letter-spacing:-.04em}
+.step.complete .num{color:var(--done)}
+.step h2{font:700 clamp(1.5rem,3vw,1.95rem)/1.15 var(--display);margin:4px 0 6px;letter-spacing:-.01em}
+.oneliner{margin:0;color:var(--muted);font-size:1.05rem}
+.step h3{font:700 1.08rem/1.3 var(--display);margin:28px 0 8px}
+.step ol,.step ul{padding-left:1.3em}
+.step li{margin:.35em 0}
+kbd{font:600 .85em var(--mono);background:var(--surface);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:1px 5px}
+code{font:400 .88em var(--mono);background:var(--info-soft);padding:1px 5px;border-radius:4px}
+
+.note{border-radius:10px;padding:14px 18px;margin:18px 0;font-size:.98rem}
+.note strong:first-child{display:block;font-family:var(--display);margin-bottom:2px}
+.note.free{background:var(--mark-soft);border-left:4px solid var(--mark)}
+.note.why{background:var(--info-soft);border-left:4px solid var(--ink)}
+.note.warn{background:var(--surface);border:1.5px dashed var(--mark)}
+
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+.tbl{overflow-x:auto;margin:14px 0}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--display);font-weight:700}
+
+.code{position:relative;margin:14px 0}
+.code pre{margin:0;background:var(--code-bg);color:var(--code-ink);font:400 .84rem/1.55 var(--mono);padding:18px 18px;border-radius:10px;overflow-x:auto;white-space:pre}
+.code .label{font:700 .8rem var(--display);color:var(--muted);margin-bottom:6px}
+.copy{position:absolute;top:30px;right:10px;font:700 .78rem var(--body);padding:5px 9px;border-radius:6px;border:1px solid #3d5966;background:#21414f;color:#E8F0EE;cursor:pointer}
+
+/* Esquemas de pantalla */
+.mock{border:1.5px solid var(--rule);border-radius:12px;background:var(--surface);margin:16px 0;overflow:hidden;font-size:.9rem}
+.mock-bar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--rule);background:var(--paper)}
+.mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--rule);display:inline-block}
+.mock-bar span{margin-left:8px;font:400 .78rem var(--mono);color:var(--muted)}
+.mock-body{display:grid;grid-template-columns:150px 1fr;min-height:180px}
+.mock-side{border-right:1px solid var(--rule);padding:12px}
+.mock-side div{padding:6px 8px;border-radius:6px;color:var(--muted)}
+.mock-side div.on{background:var(--info-soft);color:var(--ink);font-weight:700}
+.mock-main{padding:14px 16px}
+.mock-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--rule);gap:10px}
+.pill{font:700 .75rem var(--body);padding:4px 10px;border-radius:20px;border:1.5px solid var(--ink);white-space:nowrap}
+.pill.ok{border-color:var(--done);color:var(--done)}
+.hl{outline:3px solid var(--mark);outline-offset:2px;border-radius:6px}
+.cap{font-size:.82rem;color:var(--muted);padding:8px 12px;border-top:1px solid var(--rule)}
+@media (max-width:560px){.mock-body{grid-template-columns:1fr}.mock-side{display:none}}
+
+/* Checklists */
+.checks{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:6px 18px 12px;margin:22px 0}
+.checks h4{font:700 .95rem var(--display);margin:12px 0 4px;color:var(--muted)}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:8px 0;cursor:pointer;border-bottom:1px solid var(--rule)}
+.checks label:last-child{border-bottom:0}
+.checks input{appearance:none;flex:none;width:22px;height:22px;margin-top:2px;border:2px solid var(--muted);border-radius:6px;display:grid;place-items:center;cursor:pointer;background:var(--paper)}
+.checks input:checked{background:var(--done);border-color:var(--done)}
+.checks input:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.checks input:checked + span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--done)}
+.checks.verify input:checked + span{text-decoration:none;color:var(--done)}
+
+details{border:1px solid var(--rule);border-radius:10px;background:var(--surface);margin:12px 0;padding:0 16px}
+summary{cursor:pointer;font:700 1rem var(--display);padding:12px 0}
+dl{margin:0 0 14px}
+dt{font-weight:700;margin-top:10px}
+dd{margin:0;color:var(--muted)}
+
+.mobile-progress{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .rail{display:none}
+  .mobile-progress{display:flex;position:sticky;top:0;z-index:5;gap:12px;align-items:center;padding:10px 18px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:1px solid var(--rule)}
+  .mobile-progress .bar{flex:1;margin:0}
+  .mobile-progress b{font:800 1.1rem var(--display)}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+  .mobile-progress{top:0}
+}
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--rule);color:var(--muted);font-size:.9rem;max-width:72ch}
+
+.stamp{font-size:.9rem;color:var(--muted);margin-top:16px;max-width:70ch}
+.step dl{margin:0 0 14px}
+.layers{display:grid;gap:0;margin:20px 0;border:1.5px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--surface)}
+.layer{display:grid;grid-template-columns:110px 1fr;gap:4px 16px;padding:14px 18px;border-bottom:1px solid var(--rule);position:relative}
+.layer:last-child{border-bottom:0}
+.layer b{font:700 1.05rem var(--display);grid-row:span 2}
+.layer span{font-weight:700;color:var(--done)}
+.layer p{margin:0;color:var(--muted);font-size:.95rem}
+.layer:nth-child(1){border-left:6px solid var(--ink)}
+.layer:nth-child(2){border-left:6px solid var(--done)}
+.layer:nth-child(3){border-left:6px solid var(--mark)}
+.layer:nth-child(4){border-left:6px solid var(--muted)}
+@media (max-width:560px){.layer{grid-template-columns:1fr}.layer b{grid-row:auto}}
+</style>
+</head>
+<body>
+<div class="mobile-progress" aria-hidden="true"><b id="mPct">0%</b><div class="bar"><span id="mBar"></span></div></div>
+<div class="layout">
+<aside class="rail" aria-label="Progreso">
+  <h2>Tu progreso</h2>
+  <div class="pct"><span id="pct">0%</span><small id="count">0 / 0</small></div>
+  <div class="bar"><span id="bar"></span></div>
+  <ol class="stations" id="stations"></ol>
+  <div class="rail-tools">
+    <button class="btn" id="reset" type="button">Empezar de cero</button>
+  </div>
+</aside>
+
+<main>
+<header class="hero">
+  <h1>Programar con IA gratis, como una profesional</h1>
+  <p class="lede">OpenCode como agente, Warp como terminal y modelos gratuitos como cerebro. Esta guía te enseña a montarlo, a elegir el modelo adecuado para cada tarea y a salir de los atascos.</p>
+  <div class="howto">
+    <p><strong>Antes de empezar.</strong> Esta guía es la continuación de «Programar con IA, paso a paso». El método es el mismo (specs, documentación, commits); aquí cambia la herramienta. Cada paso tiene «Hazlo» y «Comprueba», y tus marcas se guardan en este navegador.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--mark)"></i>Aviso o límite del plan gratuito</span>
+      <span><i class="sw" style="background:var(--ink)"></i>Para entenderlo</span>
+      <span><i class="sw" style="background:var(--done)"></i>Paso completado</span>
+    </div>
+  </div>
+  <p class="stamp">Información comprobada el 19 de octubre de 2026. Los modelos gratuitos y los límites cambian cada pocas semanas: el paso 4 te enseña a comprobarlos tú misma.</p>
+</header>
+
+<!-- PASO 0 -->
+<section class="step" id="s0" data-title="Las cuatro piezas">
+  <div class="step-head"><div class="num">0</div><div>
+    <h2>Entiende las cuatro piezas</h2>
+    <p class="oneliner">Si entiendes qué hace cada pieza, sabrás qué cambiar cuando algo falle.</p>
+  </div></div>
+
+  <div class="layers" role="img" aria-label="Esquema de las cuatro capas: terminal, agente, proveedor y modelo">
+    <div class="layer"><b>Terminal</b><span>Warp</span><p>La ventana donde trabajas. Tú escribes ahí y ves lo que pasa.</p></div>
+    <div class="layer"><b>Agente</b><span>OpenCode</span><p>El «trabajador»: lee archivos, los edita, ejecuta comandos y sigue tus normas.</p></div>
+    <div class="layer"><b>Proveedor</b><span>OpenCode, Google AI Studio, OpenRouter…</span><p>La empresa que pone el modelo a funcionar en sus servidores y te da acceso.</p></div>
+    <div class="layer"><b>Modelo</b><span>GLM, DeepSeek, Gemini, Claude…</span><p>El «cerebro». Se puede cambiar en cualquier momento sin tocar lo demás.</p></div>
+  </div>
+
+  <div class="note why"><strong>La idea clave</strong>El agente y el modelo son cosas distintas. OpenCode es el mismo siempre; lo que cambias según la tarea (o según lo que esté gratis ese mes) es el modelo. Por eso este montaje es tan flexible: si un modelo deja de ser gratuito o falla, eliges otro y sigues trabajando.</div>
+
+  <h3>Vocabulario nuevo</h3>
+  <dl>
+    <dt>LLM o modelo</dt><dd>El programa de IA que genera el texto y el código.</dd>
+    <dt>Clave de API (API key)</dt><dd>Una contraseña larga que te da un proveedor para usar sus modelos. Es personal: nunca se comparte ni se sube a GitHub.</dd>
+    <dt>Contexto</dt><dd>Lo que el modelo «tiene en la cabeza» durante una conversación: tus mensajes, archivos leídos, normas. Tiene un tamaño máximo.</dd>
+    <dt>Token</dt><dd>Un trozo de palabra. Los límites y precios se miden en tokens.</dd>
+    <dt>Límite de uso (rate limit)</dt><dd>Cuántas peticiones puedes hacer por minuto o por día en un plan gratuito.</dd>
+    <dt>Modelo abierto (open-weight)</dt><dd>Un modelo cuyo «cerebro» es público y lo puede servir cualquier proveedor. Suelen ser los más baratos o gratuitos.</dd>
+  </dl>
+
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="0v1"><span>Sé explicar con mis palabras la diferencia entre agente, proveedor y modelo.</span></label>
+    <label><input type="checkbox" data-id="0v2"><span>Entiendo que puedo cambiar de modelo sin cambiar de herramienta.</span></label>
+  </div>
+</section>
+
+<!-- PASO 1 -->
+<section class="step" id="s1" data-title="Instalar Warp">
+  <div class="step-head"><div class="num">1</div><div>
+    <h2>Instala Warp</h2>
+    <p class="oneliner">Una terminal moderna, cómoda para quien no viene del mundo técnico.</p>
+  </div></div>
+  <ol>
+    <li>Descárgala de <a href="https://www.warp.dev">warp.dev</a>. Funciona en Windows, Mac y Linux.</li>
+    <li>Ábrela y crea la cuenta gratuita (la pide en el primer arranque).</li>
+    <li>Explora: puedes hacer clic en el texto, seleccionarlo y editarlo como en un editor normal.</li>
+    <li>Prueba a dividir la ventana en dos paneles (clic derecho → opción para dividir): en uno tendrás el agente y en el otro tus comandos (arrancar la app, ver git…).</li>
+  </ol>
+
+  <div class="note free"><strong>Plan gratuito de Warp</strong>La terminal es gratis sin límite. Lo que está limitado son los créditos de su IA integrada: unos pocos al mes, que se agotan rápido si la usas como agente. Estrategia: usa Warp como terminal y OpenCode como agente. Reserva la IA de Warp para preguntas puntuales del tipo «¿qué comando hace X?».</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="1a"><span>He instalado Warp y creado la cuenta.</span></label>
+    <label><input type="checkbox" data-id="1b"><span>He probado a dividir la ventana en dos paneles.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="1v1"><span>Al escribir <code>git --version</code> en Warp sale un número de versión.</span></label>
+  </div>
+</section>
+
+<!-- PASO 2 -->
+<section class="step" id="s2" data-title="Instalar OpenCode">
+  <div class="step-head"><div class="num">2</div><div>
+    <h2>Instala OpenCode</h2>
+    <p class="oneliner">Agente de programación de código abierto y gratuito. Funciona con casi cualquier modelo.</p>
+  </div></div>
+  <h3>En Mac o Linux</h3>
+  <p>Pega esto en Warp:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>curl -fsSL https://opencode.ai/v2/install | bash</pre></div>
+  <h3>En Windows</h3>
+  <p>Descarga la app de escritorio o el programa para Windows desde <a href="https://opencode.ai">opencode.ai</a> (sección de documentación → instalación). Los gestores de paquetes de Windows no están soportados.</p>
+  <h3>Arrancarlo</h3>
+  <p>Ve a la carpeta de tu proyecto y escribe <code>opencode</code>:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>cd ruta/a/mi-proyecto
+opencode</pre></div>
+  <div class="note why"><strong>Importante</strong>Arranca OpenCode siempre desde dentro de la carpeta del proyecto. El agente trabaja sobre la carpeta en la que está.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="2a"><span>He instalado OpenCode.</span></label>
+    <label><input type="checkbox" data-id="2b"><span>Lo he arrancado dentro de la carpeta de un proyecto.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="2v1"><span><code>opencode --version</code> muestra un número de versión.</span></label>
+    <label><input type="checkbox" data-id="2v2"><span>Al escribir <code>opencode</code> se abre su interfaz dentro de Warp.</span></label>
+  </div>
+</section>
+
+<!-- PASO 3 -->
+<section class="step" id="s3" data-title="Conectar proveedores">
+  <div class="step-head"><div class="num">3</div><div>
+    <h2>Conecta proveedores de modelos</h2>
+    <p class="oneliner">Ten al menos dos fuentes de modelos gratuitos. Si una falla, cambias a la otra.</p>
+  </div></div>
+
+  <h3>Los dos comandos que más vas a usar</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Comando</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><code>/connect</code></td><td>Añadir un proveedor (te pide elegirlo y pegar su clave).</td></tr>
+      <tr><td><code>/models</code></td><td>Ver los modelos disponibles y elegir con cuál trabajar.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Proveedores gratuitos recomendados</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Proveedor</th><th>Qué ofrece gratis</th><th>Cómo conseguir la clave</th></tr></thead>
+    <tbody>
+      <tr><td><strong>OpenCode</strong> (el suyo propio)</td><td>Una selección de modelos probados para programar, varios gratis por tiempo limitado.</td><td>Cuenta en opencode.ai → consola → crear clave.</td></tr>
+      <tr><td><strong>Google AI Studio</strong></td><td>Modelos Gemini con un plan gratuito generoso y contexto muy grande.</td><td>aistudio.google.com con tu cuenta de Google → «Get API key».</td></tr>
+      <tr><td><strong>OpenRouter</strong></td><td>Muchos modelos en un solo sitio; los gratuitos llevan «:free» en el nombre. Unas 50 peticiones al día sin pagar nada.</td><td>openrouter.ai → Keys → crear clave.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note warn"><strong>Las claves son contraseñas</strong>Pégalas solo en <code>/connect</code>. Nunca en el chat del agente, nunca en un archivo del proyecto, nunca en un commit. Si alguna vez se filtra una, bórrala en la web del proveedor y crea otra.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="3a"><span>He conectado el proveedor de OpenCode.</span></label>
+    <label><input type="checkbox" data-id="3b"><span>He conectado al menos un segundo proveedor (Google AI Studio u OpenRouter).</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="3v1"><span>En <code>/models</code> veo modelos de más de un proveedor.</span></label>
+    <label><input type="checkbox" data-id="3v2"><span>He elegido un modelo y responde a «hola, ¿qué modelo eres?».</span></label>
+  </div>
+</section>
+
+<!-- PASO 4 -->
+<section class="step" id="s4" data-title="Elegir modelos">
+  <div class="step-head"><div class="num">4</div><div>
+    <h2>Aprende a elegir el modelo</h2>
+    <p class="oneliner">No hay un modelo «mejor». Hay uno adecuado para cada tarea.</p>
+  </div></div>
+
+  <h3>Las familias de modelos</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Familia</th><th>Ejemplos</th><th>Cómo son</th></tr></thead>
+    <tbody>
+      <tr><td>Grandes de pago</td><td>Claude (Opus, Sonnet), GPT, Gemini Pro</td><td>Los más fiables en tareas largas y complejas. Gratis solo en sus chats web, con límites.</td></tr>
+      <tr><td>Abiertos grandes</td><td>GLM, Kimi, DeepSeek, Qwen, MiniMax</td><td>Muy buenos programando y mucho más baratos. Son los que suelen aparecer gratis.</td></tr>
+      <tr><td>Rápidos o «Flash»</td><td>Versiones Flash, Mini, Nano, Lite</td><td>Rápidos y baratos, menos profundos. Perfectos para tareas mecánicas.</td></tr>
+      <tr><td>Ocultos o «preview»</td><td>Nombres raros como Big Pickle</td><td>Modelos en pruebas que se ofrecen gratis a cambio de tus datos. Calidad variable.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Qué modelo usar para qué</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Tarea</th><th>Qué tipo de modelo</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr><td>Pensar la idea, escribir specs, decidir la arquitectura</td><td>El más potente al que tengas acceso (aunque sea el chat web gratuito de Claude o Gemini)</td><td>Un error aquí se arrastra a todo el proyecto.</td></tr>
+      <tr><td>Programar una tarea de una spec</td><td>Un abierto grande con buena fama programando</td><td>Equilibrio entre calidad y coste.</td></tr>
+      <tr><td>Tareas mecánicas: renombrar, formatear, mensajes de commit, actualizar docs</td><td>Uno rápido o Flash</td><td>No hace falta un cerebro grande y ahorras límites.</td></tr>
+      <tr><td>Leer muchos archivos o documentos largos</td><td>Uno con contexto grande (Gemini)</td><td>Le cabe más información a la vez.</td></tr>
+      <tr><td>Revisar código</td><td>Un modelo distinto al que lo escribió</td><td>Cada modelo tiene sus puntos ciegos; otro detecta lo que el primero no ve.</td></tr>
+      <tr><td>Arreglar un error que no se resuelve</td><td>Sube un nivel de modelo</td><td>Si un modelo da vueltas tres veces, no lo hará mejor a la cuarta.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Modelos gratuitos en OpenCode (foto de octubre de 2026)</h3>
+  <p>Esta lista caduca rápido. Úsala para entender, no como verdad fija. Para ver la actual: <code>/models</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Modelo</th><th>Privacidad según OpenCode</th></tr></thead>
+    <tbody>
+      <tr><td>GLM-5.3-Flash Free, DeepSeek V4.1 Flash Free, Space Bunny Free, LongCat 2.5 Preview Free</td><td>No guardan tus datos ni los usan para entrenar</td></tr>
+      <tr><td>Big Pickle, MiMo-V2.6-Flash Free, MiMo-V2.5 Free, Exo Free, LL Alpha Free</td><td>Pueden usar tus datos para mejorar el modelo</td></tr>
+      <tr><td>Nemotron Free (varios)</td><td>Solo para pruebas: no metas datos personales ni confidenciales</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note free"><strong>Las tres reglas de lo gratuito</strong>1) Es temporal: un modelo gratis hoy puede dejar de serlo mañana. 2) Puede costar privacidad: en proyectos de clientes o con datos reales, usa solo modelos que no entrenen con tus datos. 3) Tiene límites: cuando te los acabes, cambias de proveedor (por eso conectaste dos en el paso 3).</div>
+
+  <h3>Cómo evaluar un modelo nuevo en cinco minutos</h3>
+  <p>Ante un modelo que no conoces, dale esta prueba en un proyecto de ensayo:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>Lee el AGENTS.md y dime en tres frases cómo debo trabajar en este proyecto.
+Después crea un archivo prueba.md con una lista de los archivos del proyecto.
+No hagas nada más.</pre></div>
+  <p>Si resume bien las normas, crea el archivo de verdad (no escribe el contenido en el chat) y se detiene cuando se lo pides, sirve para trabajar como agente.</p>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="4a"><span>He revisado la lista actual de modelos con <code>/models</code>.</span></label>
+    <label><input type="checkbox" data-id="4b"><span>He probado al menos dos modelos con la prueba de cinco minutos.</span></label>
+    <label><input type="checkbox" data-id="4c"><span>He apuntado en una nota mis modelos de confianza: uno para programar, uno rápido y uno para revisar.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="4v1"><span>Sé qué modelo usar para planificar, para programar y para tareas mecánicas.</span></label>
+    <label><input type="checkbox" data-id="4v2"><span>Sé qué modelos gratuitos pueden usar mis datos para entrenar.</span></label>
+  </div>
+</section>
+
+<!-- PASO 5 -->
+<section class="step" id="s5" data-title="AGENTS.md y skills">
+  <div class="step-head"><div class="num">5</div><div>
+    <h2>Prepara el proyecto: AGENTS.md y skills</h2>
+    <p class="oneliner">Las normas del proyecto que el agente leerá siempre, igual que el CLAUDE.md de la otra guía.</p>
+  </div></div>
+
+  <div class="note warn"><strong>Ojo: OpenCode no lee CLAUDE.md</strong>La versión actual de OpenCode solo reconoce <code>AGENTS.md</code>. Si ya tienes un CLAUDE.md, copia su contenido a un AGENTS.md en la raíz del proyecto. Así funcionan las dos herramientas.</div>
+
+  <p>Si empiezas de cero, pide al agente:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>Analiza este proyecto y crea un AGENTS.md en la raíz con:
+qué es el proyecto, tecnologías, cómo arrancarlo, cómo ejecutar los tests,
+normas de trabajo (leer la spec antes de programar, tareas pequeñas,
+pedir aprobación antes de borrar o instalar), documentación que hay que
+mantener (SPECS.md, DESIGN.md, docs/decisions, CHANGELOG.md) y formato
+de commits. Enséñamelo antes de guardarlo.</pre></div>
+
+  <h3>Skills</h3>
+  <p>OpenCode encuentra skills en <code>.opencode/skills/</code>, pero también en <code>.claude/skills/</code>. Las que creaste en la otra guía funcionan sin tocar nada.</p>
+  <ul>
+    <li>El nombre de la carpeta es el identificador de la skill (ej. <code>consistencia-visual</code>).</li>
+    <li>Sin <code>description</code>, el agente no la ve. Escribe en ella cuándo usarla.</li>
+    <li>Para obligarle a usarla, menciónala en tu mensaje: <code>@consistencia-visual</code>.</li>
+  </ul>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="5a"><span>Mi proyecto tiene AGENTS.md en la raíz.</span></label>
+    <label><input type="checkbox" data-id="5b"><span>Mis skills están en <code>.claude/skills/</code> o <code>.opencode/skills/</code>.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="5v1"><span>He preguntado «¿cuáles son las normas de este proyecto?» y el agente las conoce.</span></label>
+    <label><input type="checkbox" data-id="5v2"><span>He preguntado «¿qué skills tienes disponibles?» y aparecen las mías.</span></label>
+  </div>
+</section>
+
+<!-- PASO 6 -->
+<section class="step" id="s6" data-title="Plan, Build y subagentes">
+  <div class="step-head"><div class="num">6</div><div>
+    <h2>Usa los modos Plan y Build</h2>
+    <p class="oneliner">Primero se piensa sin tocar nada; después se ejecuta.</p>
+  </div></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Agente</th><th>Qué hace</th><th>Cuándo usarlo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Plan</strong></td><td>Explora y propone, pero no modifica archivos del proyecto.</td><td>Siempre al empezar una tarea.</td></tr>
+      <tr><td><strong>Build</strong></td><td>Programa: edita archivos y ejecuta comandos.</td><td>Cuando has aprobado el plan.</td></tr>
+    </tbody>
+  </table></div>
+  <p>El agente activo se ve en la interfaz. Para cambiar entre Plan y Build se usa normalmente la tecla <kbd>Tab</kbd>; si en tu versión no funciona, búscalo en la ayuda de la propia interfaz.</p>
+
+  <h3>Un revisor con otro modelo</h3>
+  <p>Puedes crear un «subagente» que solo revisa y que usa un modelo distinto al principal. Crea el archivo <code>.opencode/agents/revisor.md</code>:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>---
+description: Revisa los cambios buscando errores y fallos de la spec
+mode: subagent
+model: opencode/deepseek-v4.1-flash-free
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
+---
+
+Revisa los cambios actuales comparándolos con la spec correspondiente
+en /specs. Lista los problemas de más a menos grave, con archivo y línea.
+No modifiques nada.</pre></div>
+  <p>Luego, al acabar una tarea: «usa el subagente revisor para revisar mis cambios». Si ese modelo deja de estar disponible, cambia la línea <code>model</code> por otro de <code>/models</code>.</p>
+
+  <h3>Que pregunte antes de subir a GitHub</h3>
+  <p>Crea <code>opencode.jsonc</code> en la raíz del proyecto para que el agente pida permiso antes de hacer push:</p>
+  <div class="code"><button class="copy" type="button">Copiar</button><pre>{
+  "$schema": "https://opencode.ai/config.json",
+  "agents": {
+    "build": {
+      "permissions": [
+        { "action": "shell", "resource": "git push *", "effect": "ask" }
+      ]
+    }
+  }
+}</pre></div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="6a"><span>He hecho una tarea empezando en Plan y pasando a Build.</span></label>
+    <label><input type="checkbox" data-id="6b"><span>He creado el subagente revisor.</span></label>
+    <label><input type="checkbox" data-id="6c"><span>He configurado que pida permiso antes de <code>git push</code>.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="6v1"><span>En modo Plan, el agente no ha modificado ningún archivo.</span></label>
+    <label><input type="checkbox" data-id="6v2"><span>El revisor me ha devuelto una lista de observaciones sin cambiar nada.</span></label>
+  </div>
+</section>
+
+<!-- PASO 7 -->
+<section class="step" id="s7" data-title="Flujo profesional">
+  <div class="step-head"><div class="num">7</div><div>
+    <h2>Trabaja con un flujo profesional</h2>
+    <p class="oneliner">El mismo método de la otra guía, adaptado a modelos gratuitos.</p>
+  </div></div>
+  <ol>
+    <li><strong>Una tarea por sesión.</strong> Los modelos gratuitos suelen tener menos contexto útil: sesiones cortas, enfocadas.</li>
+    <li><strong>Plan</strong> con tu mejor modelo disponible → apruebas.</li>
+    <li><strong>Build</strong> con tu modelo de programación.</li>
+    <li><strong>Pruebas tú</strong> contra los criterios de aceptación de la spec.</li>
+    <li><strong>Revisor</strong> con un modelo distinto.</li>
+    <li><strong>Tests y docs</strong> actualizados (puede hacerlo un modelo rápido).</li>
+    <li><strong>Commit</strong> en su rama, con mensaje claro.</li>
+    <li><strong>Sesión nueva</strong> para la siguiente tarea.</li>
+  </ol>
+  <p>Usa el segundo panel de Warp para arrancar la app y mirar <code>git status</code> mientras el agente trabaja en el primero.</p>
+  <div class="note why"><strong>Por qué todo esto es aún más importante con modelos gratuitos</strong>Vas a cambiar de modelo a menudo. Cada modelo nuevo llega sin recordar nada: lo único que sabe del proyecto es lo que está escrito en AGENTS.md, en las specs y en los docs. Un proyecto bien documentado es un proyecto que cualquier modelo puede continuar.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="7a"><span>He completado una tarea siguiendo los ocho pasos.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="7v1"><span>He cambiado de modelo a mitad de proyecto y el nuevo ha entendido en qué punto estábamos.</span></label>
+  </div>
+</section>
+
+<!-- PASO 8 -->
+<section class="step" id="s8" data-title="Combinar IAs">
+  <div class="step-head"><div class="num">8</div><div>
+    <h2>Combina varias IAs</h2>
+    <p class="oneliner">Cada IA gratuita tiene un punto fuerte. Úsalas en equipo.</p>
+  </div></div>
+  <div class="tbl"><table>
+    <thead><tr><th>IA</th><th>Papel en tu equipo</th></tr></thead>
+    <tbody>
+      <tr><td>Chat de Claude (gratis)</td><td>Pensar: entrevista para las specs, decisiones de arquitectura, revisar un AGENTS.md o una spec antes de empezar.</td></tr>
+      <tr><td>Gemini (chat o AI Studio)</td><td>Leer mucho: documentación larga o muchos archivos a la vez gracias a su contexto grande.</td></tr>
+      <tr><td>ChatGPT (gratis)</td><td>Segunda opinión y buscar skills útiles.</td></tr>
+      <tr><td>OpenCode + modelos gratuitos</td><td>Ejecutar: el que realmente toca los archivos.</td></tr>
+      <tr><td>IA de Warp</td><td>Dudas de terminal: «¿qué hace este comando?», «¿cómo veo qué ocupa este puerto?».</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note why"><strong>La regla del puente</strong>Las IAs no se hablan entre ellas: el puente son los archivos. Lo que decidas en un chat, guárdalo en una spec o en docs/decisions. Así el agente lo encuentra. Nunca dependas de «ya se lo dije a otra IA».</div>
+  <div class="code"><div class="label">Mensaje para pasar una decisión de un chat al proyecto</div><button class="copy" type="button">Copiar</button><pre>Resume lo que hemos decidido en esta conversación en formato de nota
+de decisión: contexto, decisión, alternativas descartadas y motivo.
+Lo voy a guardar en docs/decisions/ de mi proyecto.</pre></div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="8a"><span>He escrito una spec con un chat y la ha ejecutado OpenCode.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="8v1"><span>Todo lo decidido fuera del agente está guardado en un archivo del proyecto.</span></label>
+  </div>
+</section>
+
+<!-- PASO 9 -->
+<section class="step" id="s9" data-title="Resolver problemas">
+  <div class="step-head"><div class="num">9</div><div>
+    <h2>Resuelve los problemas típicos</h2>
+    <p class="oneliner">Casi todo se arregla cambiando una sola pieza: el modelo, el proveedor o la sesión.</p>
+  </div></div>
+
+  <h3>Errores de conexión con modelos</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Qué ves</th><th>Qué significa</th><th>Qué hacer</th></tr></thead>
+    <tbody>
+      <tr><td>Error 429, «rate limit», «quota exceeded», «too many requests»</td><td>Has llegado al límite gratuito de ese proveedor.</td><td>Espera unos minutos o cambia a un modelo de otro proveedor con <code>/models</code>.</td></tr>
+      <tr><td>Error 401 o 403, «unauthorized», «invalid API key»</td><td>La clave está mal, caducada o borrada.</td><td>Crea una clave nueva en la web del proveedor y vuelve a hacer <code>/connect</code>.</td></tr>
+      <tr><td>«Model not found» o el modelo desaparece de la lista</td><td>Se acabó su periodo gratuito o lo han retirado.</td><td>Elige otro en <code>/models</code> y actualiza la línea <code>model</code> de tus subagentes.</td></tr>
+      <tr><td>Se queda pensando sin responder, «timeout», «connection refused»</td><td>Problema de internet o del proveedor.</td><td>Comprueba tu conexión, mira la página de estado del proveedor y prueba con otro proveedor.</td></tr>
+      <tr><td>Error 500, 502, 503, «overloaded»</td><td>El proveedor está saturado.</td><td>No es culpa tuya. Cambia de proveedor o reintenta más tarde.</td></tr>
+      <tr><td>OpenCode entero se cuelga o no arranca</td><td>Su servicio interno se ha quedado bloqueado.</td><td>Ejecuta <code>opencode service restart</code> en otro panel de Warp.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Problemas de comportamiento del agente</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Qué pasa</th><th>Qué hacer</th></tr></thead>
+    <tbody>
+      <tr><td>Escribe el código en el chat en vez de editar los archivos</td><td>Ese modelo no maneja bien las herramientas del agente. Cambia de modelo.</td></tr>
+      <tr><td>Da vueltas al mismo error</td><td>Para con <kbd>Esc</kbd>. Sesión nueva, problema explicado desde cero y modelo más potente.</td></tr>
+      <tr><td>Ignora las normas</td><td>Comprueba que el archivo se llama exactamente <code>AGENTS.md</code> y está en la raíz. Empieza sesión nueva.</td></tr>
+      <tr><td>No usa una skill</td><td>Comprueba que tiene <code>description</code> y menciónala con <code>@nombre-skill</code>.</td></tr>
+      <tr><td>Olvida lo que habíais dicho al principio</td><td>El contexto se ha llenado. Pide que actualice la spec con lo decidido y abre sesión nueva.</td></tr>
+      <tr><td>Ha roto algo que funcionaba</td><td>Vuelve al último commit (en el segundo panel: <code>git restore .</code> deshace los cambios sin guardar). Por eso se hace commit a menudo.</td></tr>
+      <tr><td>Se han acabado los créditos de Warp</td><td>No afecta a OpenCode. Warp sigue funcionando como terminal.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Cuando no sabes qué pasa</h3>
+  <ul>
+    <li>Pide a OpenCode que se diagnostique: «tengo este problema: [descríbelo]. Revisa la página de troubleshooting de la documentación de OpenCode y tus logs y ayúdame a encontrar la causa».</li>
+    <li>Los registros están en <code>~/.local/share/opencode/log/opencode.log</code>.</li>
+    <li>Si vas a pedir ayuda en un foro, borra antes cualquier clave o dato personal de lo que copies.</li>
+  </ul>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="9a"><span>He provocado a propósito un cambio de modelo a mitad de tarea y he seguido trabajando.</span></label>
+    <label><input type="checkbox" data-id="9b"><span>He probado <code>git restore .</code> en un proyecto de ensayo.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="9v1"><span>Ante un error 429 sé qué hacer sin buscarlo.</span></label>
+    <label><input type="checkbox" data-id="9v2"><span>Sé distinguir si un problema es del modelo, del proveedor o de OpenCode.</span></label>
+  </div>
+</section>
+
+<!-- PASO 10 -->
+<section class="step" id="s10" data-title="Plan de respaldo">
+  <div class="step-head"><div class="num">10</div><div>
+    <h2>Ten un plan de respaldo</h2>
+    <p class="oneliner">Lo gratuito falla más. La diferencia profesional es tener un plan B preparado.</p>
+  </div></div>
+  <p>Escribe tu cadena de respaldo y guárdala en un sitio a mano (por ejemplo, una nota en el móvil):</p>
+  <div class="code"><div class="label">Mi cadena de modelos (rellénala con los tuyos)</div><button class="copy" type="button">Copiar</button><pre>PROGRAMAR
+1º: [modelo] en [proveedor]
+2º: [modelo] en [otro proveedor]
+3º: chat web de Claude o Gemini, pegando la spec y el archivo
+
+TAREAS RÁPIDAS
+1º: [modelo Flash]
+2º: [otro modelo Flash]
+
+REVISAR
+1º: [modelo distinto al de programar]
+
+Última revisión de esta lista: [fecha]</pre></div>
+  <p>Revisa la lista una vez al mes con <code>/models</code>: los modelos gratuitos van y vienen.</p>
+  <div class="note free"><strong>¿Cuándo merece la pena pagar?</strong>Cuando pierdas más tiempo saltando entre modelos que programando, o cuando trabajes con datos de clientes. Entonces, un plan de pago (Claude Pro para usar Claude Code, o un proveedor de pago en OpenCode) se amortiza rápido. Todo lo que has montado aquí sigue sirviendo.</div>
+
+  <div class="checks"><h4>Hazlo</h4>
+    <label><input type="checkbox" data-id="10a"><span>He escrito mi cadena de respaldo con modelos reales.</span></label>
+  </div>
+  <div class="checks verify"><h4>Comprueba</h4>
+    <label><input type="checkbox" data-id="10v1"><span>Si mi modelo principal desaparece mañana, sé exactamente cuál usar.</span></label>
+  </div>
+</section>
+
+<footer>
+  <p>Fuentes: documentación oficial de OpenCode (opencode.ai/v2/docs) y páginas de precios de Warp, OpenRouter y Google AI Studio, consultadas el 19 de octubre de 2026. Las herramientas cambian rápido: si un comando no funciona, pregunta al propio agente o consulta su documentación.</p>
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var KEY='guia-opencode-checks-v1';
+  var state={};
+  try{ state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+
+  var boxes=[].slice.call(document.querySelectorAll('.checks input[type=checkbox]'));
+  var steps=[].slice.call(document.querySelectorAll('section.step'));
+  var list=document.getElementById('stations');
+
+  steps.forEach(function(s,i){
+    var li=document.createElement('li');
+    li.innerHTML='<span class="dot">'+i+'</span><a href="#'+s.id+'"></a>';
+    li.querySelector('a').textContent=s.dataset.title;
+    list.appendChild(li);
+  });
+
+  boxes.forEach(function(b){
+    b.checked=!!state[b.dataset.id];
+    b.addEventListener('change',function(){ state[b.dataset.id]=b.checked; save(); render(); });
+  });
+
+  function render(){
+    var done=boxes.filter(function(b){return b.checked}).length;
+    var pct=boxes.length?Math.round(done/boxes.length*100):0;
+    document.getElementById('pct').textContent=pct+'%';
+    document.getElementById('count').textContent=done+' / '+boxes.length;
+    document.getElementById('bar').style.width=pct+'%';
+    document.getElementById('mPct').textContent=pct+'%';
+    document.getElementById('mBar').style.width=pct+'%';
+    steps.forEach(function(s,i){
+      var bs=[].slice.call(s.querySelectorAll('.checks input'));
+      var d=bs.filter(function(b){return b.checked}).length;
+      var li=list.children[i];
+      li.classList.toggle('complete',d===bs.length&&bs.length>0);
+      li.classList.toggle('partial',d>0&&d<bs.length);
+      s.classList.toggle('complete',d===bs.length&&bs.length>0);
+    });
+  }
+  render();
+
+  document.getElementById('reset').addEventListener('click',function(){
+    if(!confirm('¿Borrar todas las marcas y empezar de cero?'))return;
+    state={}; save(); boxes.forEach(function(b){b.checked=false}); render();
+  });
+
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var pre=btn.parentNode.querySelector('pre');
+      var txt=pre?pre.innerText:'';
+      function ok(){ btn.textContent='Copiado'; setTimeout(function(){btn.textContent='Copiar'},1500); }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(ok,function(){ fallback(); });
+      } else fallback();
+      function fallback(){
+        var t=document.createElement('textarea'); t.value=txt; document.body.appendChild(t); t.select();
+        try{document.execCommand('copy'); ok();}catch(e){ btn.textContent='Selecciona y copia'; }
+        document.body.removeChild(t);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

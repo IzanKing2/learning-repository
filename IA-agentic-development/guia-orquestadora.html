@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>De cero a orquestadora: prompts, skills, MCP y Spec-Driven Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F5FA; --card:#FFFFFF; --ink:#1E2240; --muted:#5A6082; --line:#DCE1ED;
+  --sky:#3F63F0; --sky-soft:#E6ECFF; --amber:#F0A500; --amber-soft:#FFF3D3; --mint:#178F6A; --mint-soft:#DDF4EC;
+  --bad:#C2413A; --bad-soft:#FBE7E5;
+  --shadow:0 1px 2px rgba(30,34,64,.06),0 8px 24px rgba(30,34,64,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#15182B; --card:#1D2138; --ink:#E9EBF7; --muted:#A3A9C8; --line:#2F3452;
+  --sky:#7F9BFF; --sky-soft:#232C55; --amber:#FFBE33; --amber-soft:#3A3120; --mint:#4CD3A4; --mint-soft:#183A31;
+  --bad:#FF8279; --bad-soft:#3E2226; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --paper:#15182B; --card:#1D2138; --ink:#E9EBF7; --muted:#A3A9C8; --line:#2F3452;
+  --sky:#7F9BFF; --sky-soft:#232C55; --amber:#FFBE33; --amber-soft:#3A3120; --mint:#4CD3A4; --mint-soft:#183A31;
+  --bad:#FF8279; --bad-soft:#3E2226; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 24px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0}
+img{max-width:100%;display:block}
+a{color:var(--sky)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:6px}
+
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1240px;margin:0 auto}
+nav.toc{position:sticky;top:0;height:100vh;height:100dvh;overflow:auto;padding:28px 18px 28px 24px;border-right:1px solid var(--line)}
+.toc .brand{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px;margin:0 0 4px}
+.toc .prog{font-size:14px;color:var(--muted);margin-bottom:10px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;width:0;background:var(--mint);border-radius:99px;transition:width .4s}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li a{display:flex;gap:10px;align-items:center;padding:7px 10px;border-radius:10px;text-decoration:none;color:var(--ink);font-size:15px;line-height:1.3}
+.toc li a:hover{background:var(--sky-soft)}
+.toc li a.on{background:var(--sky-soft);color:var(--sky);font-weight:700}
+.toc .n{font-style:normal;flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;border:1.5px solid var(--line);color:var(--muted);background:var(--card)}
+.toc .done .n{background:var(--mint);border-color:var(--mint);color:#fff}
+.toc .grp{font-size:13px;color:var(--muted);margin:18px 10px 6px;font-weight:700}
+.theme{margin-top:22px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;font-size:14px}
+
+.topbar{display:none}
+main{padding:40px 48px 120px;min-width:0}
+.wrap{max-width:820px;margin:0 auto}
+
+.hero{padding:32px 0 40px}
+.hero h1{font-size:clamp(40px,7vw,68px);font-weight:800;letter-spacing:-.02em;margin-bottom:18px}
+.hero h1 .float{display:inline-block;color:var(--sky);animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero p{font-size:19px;color:var(--muted);max-width:60ch;margin:0 0 22px}
+.how{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:26px}
+.how span{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:15px}
+.dotmini{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--amber);color:#1E2240;font-weight:700;font-size:12px;display:grid;place-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--sky);color:#fff;border-radius:99px;padding:12px 22px;font-weight:700;text-decoration:none}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+
+section.s{padding:56px 0 8px;border-top:1px solid var(--line)}
+.kicker{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.kicker .num{width:42px;height:42px;border-radius:12px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px}
+section.s h2{font-size:clamp(28px,4vw,38px);font-weight:700;letter-spacing:-.01em}
+.lead{font-size:18.5px;color:var(--muted);margin:10px 0 22px;max-width:62ch}
+p{max-width:66ch}
+
+figure.shot{margin:0 0 18px}
+.frame{position:relative;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);background:#111}
+.frame img{width:100%;height:auto}
+.hs{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;border:2px solid #1E2240;background:var(--amber);color:#1E2240;font-weight:700;font-size:13px;display:grid;place-items:center;padding:0;box-shadow:0 0 0 3px rgba(255,255,255,.85);transition:transform .15s}
+.hs:hover{transform:translate(-50%,-50%) scale(1.15)}
+.hs.on{background:#fff;transform:translate(-50%,-50%) scale(1.25);box-shadow:0 0 0 4px var(--amber)}
+.hs.ping::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--amber);animation:ping 1.4s ease-out 2}
+@keyframes ping{from{transform:scale(1);opacity:1}to{transform:scale(2);opacity:0}}
+.hidedots .hs{display:none}
+.figbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;font-size:14px;color:var(--muted)}
+.figbar .tools{display:flex;gap:8px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:4px 12px;font-size:13.5px}
+
+.items{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:8px}
+.items li{display:grid;grid-template-columns:30px 1fr;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid transparent;cursor:pointer;transition:background .15s,border-color .15s}
+.items li:hover{background:var(--card)}
+.items li.on{background:var(--amber-soft);border-color:var(--amber)}
+.items .k{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#1E2240;font-weight:700;font-size:13px;display:grid;place-items:center;margin-top:1px}
+.items b{display:block;font-size:16.5px}
+.items span{color:var(--muted);font-size:16px}
+.items li.on span{color:var(--ink)}
+
+.tip{display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--mint-soft);border-radius:14px;padding:14px 16px;margin:16px 0}
+.tip .ic{font-size:20px;line-height:1.4}
+.tip.warn{background:var(--amber-soft)}
+.tip p{margin:0}
+
+.got{display:flex;justify-content:flex-end;margin:18px 0 0}
+.gotbtn{border:1.5px solid var(--mint);background:transparent;color:var(--mint);border-radius:99px;padding:9px 18px;font-weight:700}
+.gotbtn.ok{background:var(--mint);color:#fff}
+
+table.t{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:14px 0;font-size:16px}
+.t th,.t td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.t th{font-size:14px;color:var(--muted);font-weight:700;background:var(--paper)}
+.t tr:last-child td{border-bottom:0}
+.tablewrap{overflow-x:auto}
+
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+.analogy div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.analogy h3{font-size:19px;margin-bottom:6px}
+.analogy p{margin:0;color:var(--muted);font-size:16px}
+.analogy .ag{border-color:var(--sky);background:var(--sky-soft)}
+.analogy .ag p{color:var(--ink)}
+
+.flow{list-style:none;margin:18px 0;padding:0;counter-reset:f}
+.flow li{position:relative;padding:0 0 22px 52px;counter-increment:f}
+.flow li::before{content:counter(f);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--sky);color:#fff;font-weight:700;display:grid;place-items:center}
+.flow li::after{content:"";position:absolute;left:17px;top:40px;bottom:4px;width:2px;background:var(--line)}
+.flow li:last-child::after{display:none}
+.flow b{display:block;font-size:17.5px}
+.flow span{color:var(--muted)}
+
+.cmp{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:3px;margin-bottom:14px;background:var(--paper)}
+.seg button{border:0;background:transparent;border-radius:99px;padding:6px 16px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.prompt{font-size:17px;border-left:4px solid var(--mint);padding:10px 14px;background:var(--mint-soft);border-radius:0 10px 10px 0;margin:0 0 10px}
+.prompt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.why{color:var(--muted);font-size:15.5px;margin:0}
+
+.quiz{display:grid;gap:14px;margin-top:16px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.q h3{font-size:18px;margin-bottom:12px;font-family:"Atkinson Hyperlegible",sans-serif;font-weight:700}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px}
+.opts button:hover:not(:disabled){border-color:var(--sky)}
+.opts button.right{border-color:var(--mint);background:var(--mint-soft)}
+.opts button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opts button:disabled{cursor:default}
+.fb{margin:10px 0 0;font-size:15.5px;color:var(--muted)}
+.score{font-weight:700;font-size:18px;margin-top:14px}
+
+details.g{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+details.g summary{padding:12px 16px;font-weight:700;cursor:pointer}
+details.g p{margin:0;padding:0 16px 14px;color:var(--muted)}
+
+.end{margin-top:60px;padding:28px;border-radius:18px;background:var(--ink);color:var(--paper)}
+.end h2{font-size:28px;margin-bottom:8px}
+.end p{margin:0;opacity:.85}
+
+#lb{position:fixed;inset:0;background:rgba(10,12,24,.92);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+#lb.open{display:flex}
+#lb img{max-height:92vh;border-radius:10px}
+#lb button{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:18px;background:#fff;color:#1E2240;border:0;border-radius:99px;padding:8px 16px;font-weight:700}
+
+@media (max-width:960px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{position:fixed;inset:0 auto 0 0;width:86%;max-width:320px;background:var(--paper);z-index:40;transform:translateX(-102%);transition:transform .25s;padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
+  nav.toc.open{transform:none;box-shadow:var(--shadow)}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:30;align-items:center;gap:12px;padding:10px 16px;background:var(--paper);border-bottom:1px solid var(--line)}
+  .topbar .t{font-family:"Bricolage Grotesque",sans-serif;font-weight:800}
+  .topbar .bar{flex:1;margin:0}
+  main{padding:20px 18px 100px}
+  .analogy{grid-template-columns:1fr}
+  .hs{width:22px;height:22px;font-size:11px}
+  .items li{padding:10px}
+}
+.route{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 28px}
+.route a{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;position:relative}
+.route a:hover{border-color:var(--sky)}
+.route .lv{font-size:13px;color:var(--muted);font-weight:700}
+.route .nm{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:17px;line-height:1.2;margin:2px 0 8px}
+.route .mini{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.route .mini i{display:block;height:100%;width:0;background:var(--mint)}
+.route a.full{border-color:var(--mint);background:var(--mint-soft)}
+.route .cnt{font-size:12.5px;color:var(--muted);margin-top:6px}
+h3.sub{font-size:21px;margin:30px 0 10px}
+.code{position:relative;background:#1D2138;color:#E9EBF7;border-radius:12px;padding:16px 16px 16px;font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre;margin:12px 0}
+:root[data-theme="dark"] .code{background:#0F1222}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .code{background:#0F1222}}
+.codewrap{position:relative}
+.cp{position:absolute;top:8px;right:8px;border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:4px 10px;font-size:13px}
+.cp:hover{background:rgba(255,255,255,.22)}
+.retos{background:var(--card);border:1.5px dashed var(--sky);border-radius:16px;padding:18px 18px 10px;margin:26px 0 10px}
+.retos h3{font-size:20px;margin:0 0 4px}
+.retos .rsub{color:var(--muted);font-size:15px;margin:0 0 12px}
+.reto{border-top:1px solid var(--line);padding:12px 0}
+.reto label{display:grid;grid-template-columns:26px 1fr;gap:10px;cursor:pointer;align-items:start}
+.reto input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--mint)}
+.reto .rt{font-weight:700}
+.reto .rd{color:var(--muted);font-size:16px;display:block}
+.reto.ok .rt{text-decoration:line-through;text-decoration-color:var(--mint)}
+.reto details{margin:6px 0 0 36px;font-size:15.5px}
+.reto summary{cursor:pointer;color:var(--sky);font-weight:700}
+.reto details p{margin:6px 0 0;color:var(--muted)}
+.lvl{display:inline-block;font-size:12.5px;font-weight:700;border-radius:99px;padding:2px 10px;margin-left:6px;vertical-align:middle}
+.lvl.f{background:var(--mint-soft);color:var(--mint)}.lvl.m{background:var(--amber-soft);color:#9A6A00}.lvl.d{background:var(--bad-soft);color:var(--bad)}
+:root[data-theme="dark"] .lvl.m{color:var(--amber)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lvl.m{color:var(--amber)}}
+.badge{display:none;margin-top:10px;background:var(--mint);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700}
+.retos.allok .badge{display:block}
+.builder{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}
+.builder label{display:block;font-weight:700;font-size:15px;margin:12px 0 4px}
+.builder label small{font-weight:400;color:var(--muted)}
+.builder input,.builder textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
+.builder textarea{min-height:64px;resize:vertical}
+.builder input:focus,.builder textarea:focus{outline:none;border-color:var(--sky)}
+.meter{display:flex;gap:6px;margin:14px 0 6px}.meter i{flex:1;height:8px;border-radius:99px;background:var(--line)}.meter i.on{background:var(--mint)}
+.mtxt{font-size:14.5px;color:var(--muted);margin:0}
+.parts{display:grid;gap:8px;margin:14px 0}
+.part{display:grid;grid-template-columns:150px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.part b{color:var(--sky)}
+.part span{color:var(--muted);font-size:16px}
+.part em{display:block;color:var(--ink);font-style:normal;font-size:15px;margin-top:4px}
+.hub{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 10px}
+.hub button{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 10px;font-weight:700}
+.hub button.on{border-color:var(--sky);background:var(--sky-soft);color:var(--sky)}
+.hubcenter{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0 4px;font-weight:700}
+.hubcenter span{background:var(--ink);color:var(--paper);border-radius:99px;padding:8px 16px}
+.hubcenter i{font-style:normal;color:var(--muted)}
+.panel{background:var(--sky-soft);border-radius:14px;padding:16px 18px;margin:10px 0 16px;min-height:90px}
+.panel h4{margin:0 0 4px;font-size:18px;font-family:"Bricolage Grotesque",sans-serif}
+.panel p{margin:0 0 8px}
+.panel .ex{background:var(--card);border-radius:10px;padding:10px 12px;font-size:16px}
+.pipe{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0 10px}
+.pipe button{border:1.5px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font-weight:700;font-size:15px}
+.pipe button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pipe .ar{color:var(--muted)}
+.orq{display:grid;gap:10px;margin:16px 0}
+.orq .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.orq .nd{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;text-align:center;min-width:140px}
+.orq .nd b{display:block}
+.orq .nd span{font-size:14px;color:var(--muted)}
+.orq .you{border-color:var(--sky);background:var(--sky-soft)}
+.orq .dn{text-align:center;color:var(--muted);font-size:20px;line-height:1}
+.cmpc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.cmpc div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.cmpc h4{margin:0 0 6px;font-family:"Bricolage Grotesque",sans-serif;font-size:17px}
+.cmpc ul{margin:0;padding-left:18px;color:var(--muted);font-size:15.5px}
+.fact{border-left:4px solid var(--sky);padding:4px 0 4px 14px;margin:14px 0}
+.fact b{display:block}
+.fact span{color:var(--muted)}
+@media (max-width:960px){.hub{grid-template-columns:repeat(2,1fr)}.part{grid-template-columns:1fr}.cmpc{grid-template-columns:1fr}}
+
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;background:var(--sky-soft);padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="topbar"><button class="chip" id="openToc" aria-label="Abrir índice">Índice</button><span class="t">De cero a orquestadora</span><div class="bar"><i class="pbar"></i></div></div>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Índice">
+  <p class="brand">De cero a orquestadora</p>
+  <div class="prog" id="progtxt">0 retos completados</div>
+  <div class="bar"><i class="pbar"></i></div>
+  <ol id="tocl">
+    <li class="grp" style="margin-top:0">Empieza aquí</li>
+    <li><a href="#inicio"><i class="n">·</i>La ruta</a></li>
+    <li class="grp">Niveles</li>
+    <li data-id="n1"><a href="#n1"><i class="n">1</i>Prompts</a></li>
+    <li data-id="n2"><a href="#n2"><i class="n">2</i>Contexto y reglas</a></li>
+    <li data-id="n3"><a href="#n3"><i class="n">3</i>Skills</a></li>
+    <li data-id="n4"><a href="#n4"><i class="n">4</i>MCP y conectores</a></li>
+    <li data-id="n5"><a href="#n5"><i class="n">5</i>Por qué Claude</a></li>
+    <li data-id="n6"><a href="#n6"><i class="n">6</i>Spec-Driven Development</a></li>
+    <li data-id="n7"><a href="#n7"><i class="n">7</i>Orquestar agentes</a></li>
+    <li class="grp">Repaso</li>
+    <li><a href="#quiz"><i class="n">·</i>Ponte a prueba</a></li>
+    <li><a href="#glosario"><i class="n">·</i>Glosario</a></li>
+  </ol>
+  <button class="theme" id="theme">Cambiar tema claro / oscuro</button>
+</nav>
+<main><div class="wrap">
+
+<header class="hero" id="inicio">
+  <h1>De cero a <span class="float">orquestadora</span></h1>
+  <p>La meta: que no escribas el código tú, sino que <strong>dirijas a varios agentes</strong> que lo escriben por ti. Tú decides qué se construye, ellos lo construyen y tú revisas.</p>
+  <p>Son 7 niveles. Cada uno tiene una explicación corta, ejemplos para copiar y <strong>retos prácticos</strong>. Marca los retos al completarlos y verás tu progreso.</p>
+  <div class="route" id="route"></div>
+  <div class="tip"><div class="ic">🧭</div><p><strong>Cómo usar la guía:</strong> no corras. Haz los retos de un nivel antes de pasar al siguiente. Cada nivel se apoya en el anterior. Los retos marcados <span class="lvl f">fácil</span> se hacen en minutos; los <span class="lvl d">reto</span> pueden llevarte una tarde.</p></div>
+</header>
+
+<!-- N1 -->
+<section class="s" id="n1">
+  <div class="kicker"><div class="num">1</div><h2>Prompts: pedir bien</h2></div>
+  <p class="lead">Un prompt es lo que le escribes al agente. El agente no lee tu mente: solo sabe lo que pones. Un buen prompt ahorra horas de correcciones.</p>
+  <h3 class="sub">Las 5 piezas de un buen prompt</h3>
+  <div class="parts">
+    <div class="part"><b>Contexto</b><span>Dónde estamos y qué hay ya.<em>«Tengo una web de recetas hecha en HTML.»</em></span></div>
+    <div class="part"><b>Tarea</b><span>Qué quieres exactamente, con un verbo claro.<em>«Añade un buscador de recetas por ingrediente.»</em></span></div>
+    <div class="part"><b>Restricciones</b><span>Qué no debe hacer o qué debe respetar.<em>«No cambies el diseño ni los colores.»</em></span></div>
+    <div class="part"><b>Formato</b><span>Cómo quieres el resultado.<em>«Explícame al final qué archivos has tocado.»</em></span></div>
+    <div class="part"><b>Criterio de éxito</b><span>Cómo sabrás que está bien.<em>«Si escribo "huevo" deben salir solo recetas con huevo.»</em></span></div>
+  </div>
+  <h3 class="sub">Constructor de prompts</h3>
+  <p>Rellena los campos y mira cómo se monta el prompt. La barra te dice cuántas piezas tienes.</p>
+  <div class="builder" id="pb">
+    <label for="pb1">Contexto <small>qué hay ya</small></label><input id="pb1" placeholder="Tengo una web personal de una sola página…">
+    <label for="pb2">Tarea <small>qué quieres</small></label><input id="pb2" placeholder="Añade una sección de contacto con un formulario…">
+    <label for="pb3">Restricciones <small>qué no tocar</small></label><input id="pb3" placeholder="No cambies los colores ni la tipografía…">
+    <label for="pb4">Formato <small>cómo lo quieres</small></label><input id="pb4" placeholder="Al terminar, resume los cambios en 3 puntos…">
+    <label for="pb5">Criterio de éxito <small>cómo sabrás que está bien</small></label><input id="pb5" placeholder="El formulario debe verse bien en el móvil…">
+    <div class="meter" id="pbm"><i></i><i></i><i></i><i></i><i></i></div><p class="mtxt" id="pbt">0 de 5 piezas</p>
+    <div class="codewrap"><pre class="code" id="pbout">Empieza a escribir arriba…</pre><button class="cp" data-copy="pbout">Copiar</button></div>
+  </div>
+  <h3 class="sub">Cuatro trucos que funcionan</h3>
+  <ul class="items" style="cursor:default">
+    <li style="cursor:default"><i class="k">1</i><div><b>Pide que te pregunte</b><span>«Antes de empezar, hazme las preguntas que necesites.» En Antigravity tienes /grill-me para esto.</span></div></li>
+    <li style="cursor:default"><i class="k">2</i><div><b>Primero el plan, luego el código</b><span>«Dime cómo lo harías, sin tocar nada todavía.» Revisas el plan y luego le das luz verde.</span></div></li>
+    <li style="cursor:default"><i class="k">3</i><div><b>Una cosa cada vez</b><span>Tareas pequeñas salen mejor que una petición enorme. Divide y vencerás.</span></div></li>
+    <li style="cursor:default"><i class="k">4</i><div><b>Corrige en la misma conversación</b><span>«Casi: el botón está bien, pero el texto es demasiado grande.» Así mantiene el contexto.</span></div></li>
+  </ul>
+  <div class="retos" data-lv="n1">
+    <h3>Retos del nivel 1</h3><p class="rsub">Hazlos en Antigravity, en un proyecto de prueba.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n1-1"><div><span class="rt">Vago contra claro</span><span class="lvl f">fácil</span><span class="rd">Pide «hazme una web personal». Luego, en otra conversación, pide lo mismo con las 5 piezas. Compara los resultados.</span></div></label>
+      <details><summary>Pista</summary><p>Fíjate en cuántas cosas ha tenido que inventarse el agente en la primera versión.</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n1-2"><div><span class="rt">Usa el constructor</span><span class="lvl f">fácil</span><span class="rd">Monta con el constructor de arriba un prompt de 5/5 piezas, cópialo y lánzalo.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n1-3"><div><span class="rt">Que te entreviste</span><span class="lvl m">medio</span><span class="rd">Escribe /grill-me y cuéntale una idea de app. Responde a sus preguntas y pídele un resumen final de lo que habéis acordado.</span></div></label>
+      <details><summary>Pista</summary><p>Guarda ese resumen: es el germen de una «spec», que verás en el nivel 6.</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n1-4"><div><span class="rt">Plan antes que código</span><span class="lvl m">medio</span><span class="rd">Pide un cambio con la frase «primero explícame el plan, no toques nada». Corrige el plan y después dile que lo ejecute.</span></div></label></div>
+    <div class="badge">🏅 Nivel 1 completado: ya sabes pedir.</div>
+  </div>
+</section>
+
+<!-- N2 -->
+<section class="s" id="n2">
+  <div class="kicker"><div class="num">2</div><h2>Contexto y reglas</h2></div>
+  <p class="lead">Cada conversación empieza de cero. Para no repetir siempre lo mismo («responde en español», «usa este estilo»…), se escriben <strong>reglas</strong> en un archivo que el agente lee solo.</p>
+  <div class="cmpc">
+    <div><h4>Sin reglas</h4><ul><li>Repites las mismas instrucciones en cada conversación.</li><li>Cada agente hace las cosas a su manera.</li><li>Resultados irregulares.</li></ul></div>
+    <div><h4>Con reglas</h4><ul><li>Lo escribes una vez.</li><li>Todos los agentes siguen las mismas normas.</li><li>Resultados coherentes.</li></ul></div>
+  </div>
+  <h3 class="sub">Dónde van las reglas</h3>
+  <p><strong>AGENTS.md</strong> es un formato abierto que leen muchos agentes. <strong>CLAUDE.md</strong> es el equivalente que lee Claude Code. En Antigravity también puedes definir reglas desde los ajustes (Customizations), globales o por proyecto, y mencionarlas con <strong>@ Rules</strong>. Se ponen en la raíz del proyecto.</p>
+  <div class="codewrap"><pre class="code" id="c-agents"># Reglas del proyecto
+
+## Idioma y tono
+- Responde siempre en español.
+- Explica los cambios en lenguaje sencillo.
+
+## Forma de trabajar
+- Antes de un cambio grande, propón un plan y espera mi aprobación.
+- No borres archivos sin preguntar.
+- Haz cambios pequeños y fáciles de revisar.
+
+## Estilo
+- Colores: #3F63F0 (principal) y #F3F5FA (fondo).
+- Diseño adaptado a móvil siempre.</pre><button class="cp" data-copy="c-agents">Copiar</button></div>
+  <div class="tip warn"><div class="ic">⚠️</div><p>Nunca pongas contraseñas ni claves en estos archivos ni en los prompts. Los agentes los leen y pueden acabar en sitios que no quieres.</p></div>
+  <div class="retos" data-lv="n2">
+    <h3>Retos del nivel 2</h3><p class="rsub">El objetivo es que el agente trabaje «a tu manera» sin que lo repitas.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n2-1"><div><span class="rt">Tu primer AGENTS.md</span><span class="lvl f">fácil</span><span class="rd">Copia la plantilla de arriba, adáptala con 5 reglas tuyas y guárdala como AGENTS.md en tu proyecto de prueba.</span></div></label>
+      <details><summary>Pista</summary><p>También puedes pedírselo al agente: «Crea un AGENTS.md con estas reglas: …».</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n2-2"><div><span class="rt">Comprueba que las cumple</span><span class="lvl f">fácil</span><span class="rd">Abre una conversación nueva, pide un cambio sin mencionar las reglas y comprueba si las respeta.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n2-3"><div><span class="rt">Reutiliza una conversación</span><span class="lvl m">medio</span><span class="rd">Usa @ Conversation para traer una conversación anterior y continúa el trabajo sin volver a explicarlo.</span></div></label></div>
+    <div class="badge">🏅 Nivel 2 completado: el agente ya trabaja a tu manera.</div>
+  </div>
+</section>
+
+<!-- N3 -->
+<section class="s" id="n3">
+  <div class="kicker"><div class="num">3</div><h2>Skills: enseñarle oficios</h2></div>
+  <p class="lead">Una regla dice <em>cómo comportarse siempre</em>. Una <strong>skill</strong> enseña <em>cómo hacer una tarea concreta</em> y el agente solo la carga cuando la necesita.</p>
+  <div class="analogy">
+    <div><h3>Regla</h3><p>«En esta empresa se habla de usted.» Se aplica siempre.</p></div>
+    <div class="ag"><h3>Skill</h3><p>«Así se hace una factura: paso 1, paso 2…» Se consulta cuando toca hacer una factura.</p></div>
+  </div>
+  <h3 class="sub">Cómo es una skill por dentro</h3>
+  <p>Es una carpeta con un archivo <strong>SKILL.md</strong>. Arriba lleva un nombre y una descripción (el agente la lee para decidir si la usa). Debajo, las instrucciones. Puede incluir también scripts o archivos de apoyo.</p>
+  <div class="codewrap"><pre class="code" id="c-skill">revisar-textos/
+└── SKILL.md
+
+---
+name: revisar-textos
+description: Revisa y mejora textos en español (ortografía, claridad y tono).
+  Úsala cuando el usuario pida revisar, corregir o mejorar un texto.
+---
+
+# Revisar textos
+
+1. Corrige ortografía y gramática.
+2. Acorta las frases de más de 25 palabras.
+3. Mantén el tono original del autor.
+4. Devuelve el texto corregido y, debajo, una lista con los cambios.</pre><button class="cp" data-copy="c-skill">Copiar</button></div>
+  <div class="tip"><div class="ic">💡</div><p>La <strong>descripción</strong> es lo más importante: si no dice claramente <em>cuándo</em> usarla, el agente no la activará.</p></div>
+  <h3 class="sub">Constructor de skills</h3>
+  <div class="builder" id="sb">
+    <label for="sb1">Nombre <small>en minúsculas y con guiones</small></label><input id="sb1" placeholder="crear-paginas-web">
+    <label for="sb2">Qué hace y cuándo usarla</label><textarea id="sb2" placeholder="Crea páginas web sencillas con mi estilo. Úsala cuando pida una página nueva."></textarea>
+    <label for="sb3">Pasos <small>uno por línea</small></label><textarea id="sb3" placeholder="Usa HTML y CSS en un solo archivo&#10;Diseño adaptado a móvil&#10;Colores azul y blanco"></textarea>
+    <div class="codewrap"><pre class="code" id="sbout">Rellena los campos…</pre><button class="cp" data-copy="sbout">Copiar</button></div>
+  </div>
+  <p>Cada herramienta guarda las skills en su carpeta (en Claude Code, <code>.claude/skills/</code>). Lo más sencillo: pégale el resultado al agente y dile <em>«guarda esta skill donde corresponda en este proyecto»</em>. Las skills siguen un estándar abierto, así que una skill bien hecha sirve en varias herramientas.</p>
+  <div class="retos" data-lv="n3">
+    <h3>Retos del nivel 3</h3><p class="rsub">Vas a crear tus propias herramientas.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n3-1"><div><span class="rt">Lee skills de verdad</span><span class="lvl f">fácil</span><span class="rd">Abre github.com/anthropics/skills, entra en dos skills y fíjate en su descripción e instrucciones.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n3-2"><div><span class="rt">Tu primera skill</span><span class="lvl m">medio</span><span class="rd">Crea con el constructor una skill para algo que haces a menudo y pide al agente que la guarde.</span></div></label>
+      <details><summary>Pista</summary><p>Ideas: revisar textos, crear páginas con tu estilo, preparar la lista de la compra a partir de recetas.</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n3-3"><div><span class="rt">Que la use solo</span><span class="lvl m">medio</span><span class="rd">En una conversación nueva, pide una tarea que encaje con tu skill sin nombrarla. Comprueba que la ha usado.</span></div></label>
+      <details><summary>Pista</summary><p>Si no la usa, mejora la descripción para que diga mejor cuándo aplicarla.</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n3-4"><div><span class="rt">Que aprenda de ti</span><span class="lvl d">reto</span><span class="rd">Tras una sesión larga de trabajo, usa /learn en Antigravity y revisa qué reglas o skills propone guardar.</span></div></label></div>
+    <div class="badge">🏅 Nivel 3 completado: ya creas tus propias herramientas.</div>
+  </div>
+</section>
+
+<!-- N4 -->
+<section class="s" id="n4">
+  <div class="kicker"><div class="num">4</div><h2>MCP y conectores</h2></div>
+  <p class="lead">Hasta ahora el agente solo trabaja con archivos. Con <strong>MCP</strong> puede usar tus otras herramientas: correo, calendario, base de datos, servidores… Es lo que hace que todo quede interconectado.</p>
+  <div class="fact"><b>La idea en una frase</b><span>MCP (Model Context Protocol) es un «enchufe universal»: cualquier herramienta que tenga su servidor MCP se puede conectar a cualquier agente compatible, sin programar nada a medida.</span></div>
+  <p>En <strong>claude.ai</strong> se llaman <strong>conectores</strong> y se activan con un par de clics. En <strong>Antigravity</strong> se añaden como servidores MCP desde la configuración del agente. Toca cada herramienta para ver qué podrías pedir:</p>
+  <div class="hubcenter"><span>Tú</span><i>→</i><span>Claude</span><i>→ MCP →</i></div>
+  <div class="hub" id="hub"></div>
+  <div class="panel" id="hubp"></div>
+  <div class="tip warn"><div class="ic">⚠️</div><p>Un conector da permisos reales: puede leer tu correo o tocar una base de datos. Conecta solo lo que necesites y revisa lo que va a hacer antes de aprobar acciones que envían, borran o publican.</p></div>
+  <div class="retos" data-lv="n4">
+    <h3>Retos del nivel 4</h3><p class="rsub">Empieza en claude.ai, que es lo más sencillo.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n4-1"><div><span class="rt">Tu primer conector</span><span class="lvl f">fácil</span><span class="rd">En claude.ai, conecta Google Calendar y pregunta «¿qué tengo esta semana?».</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n4-2"><div><span class="rt">Dos herramientas a la vez</span><span class="lvl m">medio</span><span class="rd">Conecta también Gmail y pide: «Busca el último correo sobre [tema] y crea un recordatorio en mi calendario para responderlo».</span></div></label>
+      <details><summary>Pista</summary><p>Aquí está la magia: una sola petición usa dos herramientas distintas.</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n4-3"><div><span class="rt">MCP en Antigravity</span><span class="lvl d">reto</span><span class="rd">En Antigravity, abre la lista de servidores MCP, añade uno (por ejemplo, GitHub o Supabase) y pide al agente «¿qué herramientas MCP tienes disponibles?».</span></div></label></div>
+    <div class="badge">🏅 Nivel 4 completado: tus herramientas ya hablan entre sí.</div>
+  </div>
+</section>
+
+<!-- N5 -->
+<section class="s" id="n5">
+  <div class="kicker"><div class="num">5</div><h2>Por qué Claude encaja tan bien</h2></div>
+  <p class="lead">Las piezas de los niveles 3 y 4 (skills y MCP) nacieron en Anthropic, la empresa que crea Claude. Por eso en Claude están integradas desde el principio.</p>
+  <div class="fact"><b>MCP lo creó Anthropic</b><span>Se presentó en noviembre de 2024 como estándar abierto. Después lo adoptaron OpenAI y Google DeepMind, y en diciembre de 2025 Anthropic lo donó a la Agentic AI Foundation, dentro de la Linux Foundation, para que siga siendo abierto y neutral.</span></div>
+  <div class="fact"><b>Las skills también</b><span>Anthropic publicó Agent Skills como estándar abierto en diciembre de 2025 (agentskills.io), y otras herramientas lo han adoptado.</span></div>
+  <div class="fact"><b>Conectores listos para usar</b><span>En claude.ai activas Gmail, Calendar, Drive, Supabase, Vercel y muchos más desde un directorio, sin configurar servidores.</span></div>
+  <div class="fact"><b>Un ecosistema completo</b><span>Claude.ai para conversar y conectar herramientas, Claude Code para programar con agentes desde el terminal o el escritorio, y skills y conectores compartidos entre ellos.</span></div>
+  <div class="fact"><b>También dentro de Antigravity</b><span>En el selector de modelos de Antigravity aparecen Claude Sonnet y Claude Opus, así que puedes usarlos sin salir de la herramienta.</span></div>
+  <div class="tip"><div class="ic">💡</div><p>Como MCP y las skills son estándares abiertos, <strong>lo que aprendas aquí te sirve en cualquier herramienta</strong>. Elegir Claude es elegir la que los diseñó, no quedarte encerrada en ella.</p></div>
+  <div class="retos" data-lv="n5">
+    <h3>Retos del nivel 5</h3><p class="rsub">Compruébalo tú misma en vez de creértelo.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n5-1"><div><span class="rt">Misma tarea, dos modelos</span><span class="lvl f">fácil</span><span class="rd">En Antigravity, pide la misma tarea con Gemini y con Claude Sonnet en dos conversaciones. Compara el resultado y anota cuál te convence más.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n5-2"><div><span class="rt">Explora el directorio</span><span class="lvl f">fácil</span><span class="rd">En claude.ai, abre el directorio de conectores y apunta tres que te serían útiles.</span></div></label></div>
+    <div class="badge">🏅 Nivel 5 completado: ya sabes elegir herramienta.</div>
+  </div>
+</section>
+
+<!-- N6 -->
+<section class="s" id="n6">
+  <div class="kicker"><div class="num">6</div><h2>Spec-Driven Development</h2></div>
+  <p class="lead">Programar «a base de prompts» funciona para cosas pequeñas. Para proyectos de verdad se trabaja al revés: <strong>primero se escribe qué se quiere (la spec) y después los agentes lo construyen siguiéndola</strong>.</p>
+  <div class="cmpc">
+    <div><h4>Vibe coding</h4><ul><li>Pides cosas sobre la marcha.</li><li>El agente improvisa.</li><li>Cuesta saber si está terminado.</li></ul></div>
+    <div><h4>Spec-Driven</h4><ul><li>Defines qué y por qué antes del cómo.</li><li>El agente sigue un documento.</li><li>Sabes que está hecho cuando cumple la spec.</li></ul></div>
+  </div>
+  <h3 class="sub">Las fases</h3>
+  <p>Toca cada fase. Es el flujo de <strong>Spec Kit</strong>, la herramienta de GitHub para trabajar así, aunque la idea vale para cualquier agente.</p>
+  <div class="pipe" id="pipe"></div>
+  <div class="panel" id="pipep"></div>
+  <h3 class="sub">Plantilla de spec para empezar</h3>
+  <div class="codewrap"><pre class="code" id="c-spec"># Spec: [nombre de la app]
+
+## Qué es y para quién
+Una frase: qué problema resuelve y quién lo usa.
+
+## Historias de usuario
+- Como [usuario], quiero [hacer algo] para [conseguir algo].
+- Como [usuario], quiero …
+
+## Criterios de aceptación
+- [ ] Al pulsar «Guardar», la receta aparece en la lista.
+- [ ] En el móvil se ve todo sin desplazarse de lado.
+
+## Fuera de alcance (esta versión NO incluye)
+- Cuentas de usuario.
+- Pagos.
+
+## Preguntas abiertas
+- ¿Se guardan los datos en el navegador o en una base de datos?</pre><button class="cp" data-copy="c-spec">Copiar</button></div>
+  <div class="tip"><div class="ic">💡</div><p>La spec habla de <strong>qué</strong> y <strong>por qué</strong>, nunca de tecnologías. El «cómo» (qué lenguaje, qué base de datos) va en el plan.</p></div>
+  <div class="retos" data-lv="n6">
+    <h3>Retos del nivel 6</h3><p class="rsub">Elige una mini app sencilla y llévala hasta el final. Idea: un planificador de comidas de la semana.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n6-1"><div><span class="rt">Escribe tu spec</span><span class="lvl m">medio</span><span class="rd">Rellena la plantilla para tu mini app. Mínimo 3 historias de usuario y 3 criterios de aceptación.</span></div></label>
+      <details><summary>Pista</summary><p>Usa /grill-me para que el agente te ayude a encontrar lo que se te ha olvidado.</p></details></div>
+    <div class="reto"><label><input type="checkbox" data-r="n6-2"><div><span class="rt">Plan y tareas, sin código</span><span class="lvl m">medio</span><span class="rd">Pide: «A partir de spec.md, crea plan.md y tasks.md. No escribas código todavía». Revisa ambos y corrígelos.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n6-3"><div><span class="rt">Construye tarea a tarea</span><span class="lvl d">reto</span><span class="rd">Pide que implemente las tareas de una en una. Después de cada una, revisa con Review y marca la tarea como hecha.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n6-4"><div><span class="rt">Verifica contra la spec</span><span class="lvl m">medio</span><span class="rd">Pide: «Comprueba punto por punto si la app cumple los criterios de aceptación de spec.md».</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n6-5"><div><span class="rt">Con Spec Kit</span><span class="lvl d">reto</span><span class="rd">Instala Spec Kit (github.com/github/spec-kit) en un proyecto nuevo y repite el proceso con sus comandos.</span></div></label>
+      <details><summary>Pista</summary><p>Según la versión, los comandos aparecen como /speckit-specify o /speckit.specify. Sigue las instrucciones de su README.</p></details></div>
+    <div class="badge">🏅 Nivel 6 completado: ya construyes con método.</div>
+  </div>
+</section>
+
+<!-- N7 -->
+<section class="s" id="n7">
+  <div class="kicker"><div class="num">7</div><h2>Orquestar agentes</h2></div>
+  <p class="lead">El último paso: en vez de un agente haciendo todo en fila, <strong>varios agentes trabajan a la vez</strong>, cada uno en su parte, y tú diriges.</p>
+  <div class="orq">
+    <div class="row"><div class="nd you"><b>Tú, la orquestadora</b><span>Decides qué, escribes la spec, revisas y apruebas</span></div></div>
+    <div class="dn">↓</div>
+    <div class="row"><div class="nd"><b>Spec + plan + tareas</b><span>La fuente de verdad</span></div></div>
+    <div class="dn">↓</div>
+    <div class="row"><div class="nd"><b>Agente 1</b><span>Interfaz</span></div><div class="nd"><b>Agente 2</b><span>Datos</span></div><div class="nd"><b>Agente 3</b><span>Pruebas</span></div></div>
+    <div class="dn">↓</div>
+    <div class="row"><div class="nd"><b>Herramientas vía MCP</b><span>GitHub, Supabase, Vercel…</span></div></div>
+  </div>
+  <h3 class="sub">Lo que ya tienes para orquestar</h3>
+  <ul class="items">
+    <li style="cursor:default"><i class="k">1</i><div><b>Worktree</b><span>Cada agente trabaja en su propia copia, así no se pisan entre ellos.</span></div></li>
+    <li style="cursor:default"><i class="k">2</i><div><b>Tareas paralelas en tasks.md</b><span>Spec Kit marca con [P] las tareas que pueden hacerse a la vez: son las que repartes entre agentes.</span></div></li>
+    <li style="cursor:default"><i class="k">3</i><div><b>/goal</b><span>Le das al agente un objetivo con criterios claros y trabaja hasta cumplirlo.</span></div></li>
+    <li style="cursor:default"><i class="k">4</i><div><b>/teamwork-preview</b><span>Antigravity pone a un equipo de agentes con un proyecto grande (función en pruebas).</span></div></li>
+    <li style="cursor:default"><i class="k">5</i><div><b>/schedule</b><span>Tareas que se repiten solas, como revisar errores cada mañana.</span></div></li>
+  </ul>
+  <div class="tip"><div class="ic">💡</div><p>Orquestar no es desentenderse. Tu trabajo pasa a ser <strong>definir bien</strong> (spec), <strong>repartir</strong> (tareas) y <strong>revisar</strong> (Review). Cuanto mejor la spec, menos tienes que corregir.</p></div>
+  <div class="retos" data-lv="n7">
+    <h3>Retos del nivel 7</h3><p class="rsub">El proyecto final junta todo lo aprendido.</p>
+    <div class="reto"><label><input type="checkbox" data-r="n7-1"><div><span class="rt">Dos agentes en paralelo</span><span class="lvl m">medio</span><span class="rd">Con tu mini app del nivel 6, abre dos conversaciones con Worktree: una mejora la interfaz y otra añade una función nueva. Integra los dos resultados.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n7-2"><div><span class="rt">Objetivo con criterios</span><span class="lvl m">medio</span><span class="rd">Usa /goal con los criterios de aceptación de tu spec y deja que trabaje hasta cumplirlos.</span></div></label></div>
+    <div class="reto"><label><input type="checkbox" data-r="n7-3"><div><span class="rt">Proyecto final</span><span class="lvl d">reto</span><span class="rd">Una app nueva de principio a fin: spec, plan y tareas; reparte las tareas paralelas entre agentes; conecta un MCP (por ejemplo, Supabase para los datos o Vercel para publicarla) y verifica contra la spec.</span></div></label>
+      <details><summary>Pista</summary><p>Si te atascas, vuelve al nivel donde está la pieza que falla: casi siempre es una spec poco clara o un prompt sin criterio de éxito.</p></details></div>
+    <div class="badge">🏆 Nivel 7 completado: eres orquestadora.</div>
+  </div>
+</section>
+
+<section class="s" id="quiz">
+  <div class="kicker"><h2>Ponte a prueba</h2></div>
+  <p class="lead">Seis preguntas para comprobar que lo tienes claro.</p>
+  <div class="quiz" id="quizbox"></div>
+  <div class="score" id="score"></div>
+</section>
+
+<section class="s" id="glosario">
+  <div class="kicker"><h2>Glosario</h2></div>
+  <p class="lead">Toca cada palabra para ver qué significa.</p>
+  <div id="glos"></div>
+  <div class="end"><h2>El camino es practicar</h2><p>No hace falta saberlo todo para empezar. Haz un reto al día y en unas semanas estarás dirigiendo a tus propios agentes.</p></div>
+</section>
+
+</div></main>
+</div>
+<script>
+const LV=[["n1","Prompts"],["n2","Contexto y reglas"],["n3","Skills"],["n4","MCP y conectores"],["n5","Por qué Claude"],["n6","Spec-Driven"],["n7","Orquestar"]];
+let st={};try{st=JSON.parse(localStorage.getItem("ag2-retos")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("ag2-retos",JSON.stringify(st))}catch(e){}};
+const boxes=[...document.querySelectorAll("input[data-r]")];
+document.getElementById("route").innerHTML=LV.map((l,i)=>`<a href="#${l[0]}" data-rt="${l[0]}"><div class="lv">Nivel ${i+1}</div><div class="nm">${l[1]}</div><div class="mini"><i></i></div><div class="cnt"></div></a>`).join("");
+function refresh(){
+  boxes.forEach(b=>{b.checked=!!st[b.dataset.r];b.closest(".reto").classList.toggle("ok",b.checked)});
+  let tot=0,dn=0;
+  LV.forEach(([id])=>{
+    const bs=boxes.filter(b=>b.dataset.r.startsWith(id+"-")),d=bs.filter(b=>b.checked).length;tot+=bs.length;dn+=d;
+    const a=document.querySelector(`[data-rt="${id}"]`);a.querySelector(".mini i").style.width=(d/bs.length*100)+"%";a.querySelector(".cnt").textContent=`${d} de ${bs.length} retos`;a.classList.toggle("full",d===bs.length);
+    document.querySelector(`.retos[data-lv="${id}"]`).classList.toggle("allok",d===bs.length);
+    const li=document.querySelector(`#tocl li[data-id="${id}"]`);li.classList.toggle("done",d===bs.length);li.querySelector(".n").textContent=d===bs.length?"✓":LV.findIndex(x=>x[0]===id)+1;
+  });
+  document.getElementById("progtxt").textContent=`${dn} de ${tot} retos completados`;
+  document.querySelectorAll(".pbar").forEach(b=>b.style.width=(dn/tot*100)+"%");
+}
+boxes.forEach(b=>b.addEventListener("change",()=>{st[b.dataset.r]=b.checked;save();refresh()}));refresh();
+
+document.addEventListener("click",e=>{const c=e.target.closest("[data-copy]");if(!c)return;const txt=document.getElementById(c.dataset.copy).textContent;
+  const done=()=>{c.textContent="¡Copiado!";setTimeout(()=>c.textContent="Copiar",1500)};
+  const fb=()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand("copy");done()}catch(e){}t.remove()};
+  try{navigator.clipboard.writeText(txt).then(done,fb)}catch(e){fb()}});
+
+const pbIds=["pb1","pb2","pb3","pb4","pb5"],pbLab=["Contexto","Tarea","Restricciones","Formato del resultado","Criterio de éxito"];
+function pb(){const v=pbIds.map(i=>document.getElementById(i).value.trim());const n=v.filter(Boolean).length;
+  document.querySelectorAll("#pbm i").forEach((x,i)=>x.classList.toggle("on",i<n));
+  document.getElementById("pbt").textContent=`${n} de 5 piezas`+(n===5?": prompt completo":n>=3?": vas bien":"");
+  document.getElementById("pbout").textContent=n?v.map((x,i)=>x?`${pbLab[i]}: ${x}`:"").filter(Boolean).join("\n"):"Empieza a escribir arriba…";}
+pbIds.forEach(i=>document.getElementById(i).addEventListener("input",pb));
+function sb(){const n=document.getElementById("sb1").value.trim().toLowerCase().replace(/\s+/g,"-")||"mi-skill",d=document.getElementById("sb2").value.trim()||"Qué hace. Úsala cuando…",
+  p=document.getElementById("sb3").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  document.getElementById("sbout").textContent=`${n}/\n└── SKILL.md\n\n---\nname: ${n}\ndescription: ${d}\n---\n\n# ${n.replace(/-/g," ")}\n\n`+(p.length?p.map((x,i)=>`${i+1}. ${x}`).join("\n"):"1. Primer paso…");}
+["sb1","sb2","sb3"].forEach(i=>document.getElementById(i).addEventListener("input",sb));sb();
+
+const HUB=[["Gmail","Buscar y leer correos, preparar borradores.","«Resume los correos sin leer de hoy y prepara un borrador de respuesta al de mi jefe.»"],
+ ["Google Calendar","Consultar y crear eventos, buscar huecos libres.","«¿Qué tengo el jueves? Búscame un hueco de una hora para quedar con Ana.»"],
+ ["Google Drive","Buscar y leer documentos.","«Busca en mi Drive el documento del presupuesto y dime el total.»"],
+ ["Supabase","Base de datos: ver tablas, consultar datos, crear tablas.","«Crea una tabla de recetas con nombre, ingredientes y tiempo de preparación.»"],
+ ["Vercel","Publicar webs y ver si algo ha fallado.","«¿Por qué ha fallado el último despliegue de mi web?»"],
+ ["Todoist","Gestionar listas de tareas.","«Convierte las tareas pendientes de tasks.md en tareas de Todoist.»"]];
+const hub=document.getElementById("hub"),hubp=document.getElementById("hubp");
+hub.innerHTML=HUB.map((h,i)=>`<button data-h="${i}">${h[0]}</button>`).join("");
+function showHub(i){hub.querySelectorAll("button").forEach((b,j)=>b.classList.toggle("on",j===i));const h=HUB[i];hubp.innerHTML=`<h4>${h[0]}</h4><p>${h[1]}</p><div class="ex">${h[2]}</div>`}
+hub.addEventListener("click",e=>{const b=e.target.closest("[data-h]");if(b)showHub(+b.dataset.h)});showHub(0);
+
+const PIPE=[["Constitución","constitution.md","Los principios que no se negocian en todo el proyecto. Se hace una vez.","«El código debe ser sencillo, todo adaptado a móvil y con pruebas para cada función.»"],
+ ["Especificar","spec.md","Qué se construye y por qué: historias de usuario y criterios de aceptación. Nada de tecnologías.","«Una app para planificar las comidas de la semana y sacar la lista de la compra.»"],
+ ["Clarificar","preguntas","El agente pregunta lo que no queda claro para quitar ambigüedades antes de seguir.","«¿Las comidas se repiten cada semana o se planifican de cero?»"],
+ ["Planificar","plan.md","El cómo: tecnologías, estructura y datos.","«Web con HTML y JavaScript; los datos en Supabase.»"],
+ ["Tareas","tasks.md","El plan troceado en tareas pequeñas y ordenadas. Las que pueden hacerse a la vez se marcan con [P].","«T1 Crear tabla de comidas · T2 [P] Pantalla de la semana · T3 [P] Lista de la compra»"],
+ ["Implementar","código","Los agentes escriben el código tarea a tarea, siguiendo los documentos.","Revisas cada tarea con Review antes de pasar a la siguiente."],
+ ["Verificar","¿cumple la spec?","Se comprueba el resultado contra los criterios de aceptación. Si falta algo, se vuelve a implementar.","«Comprueba punto por punto los criterios de spec.md.»"]];
+const pipe=document.getElementById("pipe"),pipep=document.getElementById("pipep");
+pipe.innerHTML=PIPE.map((p,i)=>(i?'<span class="ar">→</span>':"")+`<button data-p="${i}">${p[0]}</button>`).join("");
+function showPipe(i){pipe.querySelectorAll("button").forEach((b,j)=>b.classList.toggle("on",j===i));const p=PIPE[i];pipep.innerHTML=`<h4>${i+1}. ${p[0]} · <span style="font-weight:500;color:var(--muted)">${p[1]}</span></h4><p>${p[2]}</p><div class="ex">${p[3]}</div>`}
+pipe.addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(b)showPipe(+b.dataset.p)});showPipe(0);
+
+const QUIZ=[["¿Qué pieza le falta a «haz una web bonita»?",["Casi todas: contexto, restricciones, formato y criterio de éxito","Ninguna, está perfecto","Solo el formato"],0,"Sin contexto ni criterio, el agente tiene que adivinar."],
+ ["Quieres que el agente responda siempre en español en un proyecto. ¿Dónde lo pones?",["En cada prompt","En un archivo de reglas como AGENTS.md","En una skill"],1,"Lo que aplica siempre va en las reglas."],
+ ["¿Qué parte de una skill decide si el agente la usa?",["El nombre de la carpeta","La descripción","El número de pasos"],1,"La descripción debe decir qué hace y cuándo usarla."],
+ ["¿Para qué sirve MCP?",["Para conectar el agente con otras herramientas como correo o bases de datos","Para cambiar de modelo","Para hacer el código más rápido"],0,"Es el «enchufe universal» entre agentes y herramientas."],
+ ["En Spec-Driven Development, ¿qué va en la spec?",["Las tecnologías que se usarán","Qué se construye y por qué","El código"],1,"El cómo va en el plan; la spec es el qué y el por qué."],
+ ["Como orquestadora, ¿cuál es tu trabajo principal?",["Escribir el código","Definir, repartir y revisar","Elegir los colores"],1,"Los agentes construyen; tú diriges y das el visto bueno."]];
+let sc=0,ans=0;const qb=document.getElementById("quizbox");
+qb.innerHTML=QUIZ.map((q,i)=>`<div class="q"><h3>${i+1}. ${q[0]}</h3><div class="opts">${q[1].map((o,j)=>`<button data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="fb" id="fb${i}"></p></div>`).join("");
+qb.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(!b)return;const i=+b.dataset.q,o=+b.dataset.o,q=QUIZ[i];
+  const bs=qb.querySelectorAll(`[data-q="${i}"]`);bs.forEach(x=>x.disabled=true);bs[q[2]].classList.add("right");if(o===q[2])sc++;else b.classList.add("wrong");ans++;
+  document.getElementById("fb"+i).textContent=(o===q[2]?"¡Bien! ":"Casi. ")+q[3];
+  if(ans===QUIZ.length)document.getElementById("score").textContent=`Resultado: ${sc} de ${QUIZ.length}. ${sc===QUIZ.length?"¡Perfecto!":sc>=4?"¡Muy bien!":"Repasa los niveles y vuelve a intentarlo."}`;});
+
+const GLOS=[["Prompt","Lo que le escribes al agente para pedirle algo."],["Contexto","Información que el agente tiene para hacer la tarea: archivos, reglas, conversaciones, capturas."],
+ ["Reglas (AGENTS.md, CLAUDE.md)","Instrucciones que el agente sigue siempre en un proyecto."],["Skill","Carpeta con un SKILL.md que enseña al agente a hacer una tarea concreta. Solo se carga cuando hace falta."],
+ ["MCP","Model Context Protocol: estándar abierto para conectar agentes con herramientas externas."],["Conector","Nombre que reciben en claude.ai las conexiones MCP listas para activar."],
+ ["Servidor MCP","El programa que expone las funciones de una herramienta (Gmail, Supabase…) para que el agente las use."],
+ ["Spec","Documento que describe qué se construye y por qué, con criterios de aceptación."],["Criterios de aceptación","Lista de condiciones que deben cumplirse para dar algo por terminado."],
+ ["Plan","Documento con el cómo: tecnologías, estructura y datos."],["Tareas (tasks.md)","El plan dividido en pasos pequeños y ordenados."],
+ ["Worktree","Copia aislada del proyecto donde trabaja un agente sin afectar al resto."],["Orquestar","Dirigir a varios agentes: definir, repartir el trabajo y revisar."],
+ ["Vibe coding","Programar pidiendo cosas sobre la marcha, sin plan previo."]];
+document.getElementById("glos").innerHTML=GLOS.map(g=>`<details class="g"><summary>${g[0]}</summary><p>${g[1]}</p></details>`).join("");
+
+const io=new IntersectionObserver(es=>es.forEach(en=>{if(!en.isIntersecting)return;const id=en.target.id;
+  document.querySelectorAll("#tocl a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+id))}),{rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll("section.s,header.hero").forEach(s=>io.observe(s));
+const toc=document.getElementById("toc");document.getElementById("openToc").onclick=()=>toc.classList.toggle("open");
+toc.addEventListener("click",e=>{if(e.target.closest("a"))toc.classList.remove("open")});
+document.getElementById("theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme=dark?"light":"dark";try{localStorage.setItem("ag-theme",r.dataset.theme)}catch(e){}};
+try{const t=localStorage.getItem("ag-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+</script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claude en clase · Guía para la profe de Educación Física</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#f6f7f1;--tinta:#1b2620;--suave:#56635b;--linea:#d5dccf;--tarjeta:#ffffff;--pista:#1d7a4e;--pista-claro:#e3f1e8;--cono:#e8641c;--cono-claro:#fdeadf;--cielo:#2a63cf;--cielo-claro:#e4ecfb;--aviso:#fff4cf;--aviso-borde:#e2c45a;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--papel:#121814;--tinta:#e9efe9;--suave:#a5b2a9;--linea:#2c3830;--tarjeta:#1a231d;--pista:#4cc78a;--pista-claro:#1d3428;--cono:#ff8a4c;--cono-claro:#3a2418;--cielo:#7ea6ff;--cielo-claro:#1c2640;--aviso:#332b10;--aviso-borde:#7a6420;color-scheme:dark}}
+:root[data-theme="dark"]{--papel:#121814;--tinta:#e9efe9;--suave:#a5b2a9;--linea:#2c3830;--tarjeta:#1a231d;--pista:#4cc78a;--pista-claro:#1d3428;--cono:#ff8a4c;--cono-claro:#3a2418;--cielo:#7ea6ff;--cielo-claro:#1c2640;--aviso:#332b10;--aviso-borde:#7a6420;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);font-family:"Atkinson Hyperlegible",Verdana,system-ui,sans-serif;font-size:19px;line-height:1.55}
+h1,h2,h3{font-family:"Bricolage Grotesque","Arial Rounded MT Bold",system-ui,sans-serif;line-height:1.1;margin:0 0 .4em}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800}
+h3{font-size:1.25rem;font-weight:600}
+p{margin:.3em 0 .8em;max-width:62ch}
+a{color:var(--cielo)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--cielo);outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--papel)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--papel);border-bottom:2px solid var(--linea)}
+.top{display:flex;align-items:center;gap:14px;padding:10px 0;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.15rem;margin-right:auto;background:none;border:0;padding:0}
+.silbato{width:38px;height:38px;border-radius:50%;background:var(--pista);display:grid;place-items:center;color:#fff;font-size:1.2rem}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{background:transparent;border:2px solid transparent;border-radius:999px;padding:7px 14px;font-weight:700;color:var(--suave)}
+.tab[aria-selected="true"]{background:var(--pista);color:#fff}
+.tab:hover:not([aria-selected="true"]){border-color:var(--linea);color:var(--tinta)}
+main{padding:28px 0 80px}
+.vista{display:none}.vista.on{display:block}
+/* portada */
+.saludo{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:end;margin-bottom:26px}
+.saludo .lado{background:var(--pista-claro);border-radius:22px;padding:18px 20px;font-size:.95rem}
+.saludo .lado b{color:var(--pista)}
+.pasos3{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.pasos3 span{background:var(--tarjeta);border:2px solid var(--linea);border-radius:14px;padding:6px 10px;font-size:.88rem}
+.buscar{display:flex;gap:10px;align-items:center;background:var(--tarjeta);border:2px solid var(--linea);border-radius:18px;padding:6px 8px 6px 16px;margin-bottom:22px}
+.buscar input{flex:1;border:0;background:none;font:inherit;color:inherit;padding:10px 0;min-width:0}
+.buscar input:focus{outline:none}.buscar:focus-within{border-color:var(--pista)}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.cat{border:2px solid var(--linea);background:var(--tarjeta);border-radius:999px;padding:7px 15px;font-weight:700}
+.cat[aria-pressed="true"]{border-color:var(--tinta);background:var(--tinta);color:var(--papel)}
+.grupo{margin:26px 0 8px;display:flex;align-items:baseline;gap:12px}
+.grupo h2{margin:0}.grupo small{color:var(--suave)}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.tarea{text-align:left;background:var(--tarjeta);border:2px solid var(--linea);border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s,transform .15s}
+.tarea:hover{border-color:var(--pista);transform:translateY(-2px)}
+.tarea .ico{font-size:1.9rem;line-height:1}
+.tarea b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.12rem}
+.tarea span.d{color:var(--suave);font-size:.92rem;line-height:1.4}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.chip{font-size:.78rem;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--cielo-claro);color:var(--cielo)}
+.chip.nada{background:var(--pista-claro);color:var(--pista)}
+.vacio{color:var(--suave);padding:20px 0}
+/* detalle */
+.volver{background:none;border:0;color:var(--cielo);font-weight:700;padding:0;margin-bottom:14px}
+.cabecera{display:flex;gap:16px;align-items:flex-start;margin-bottom:10px}
+.cabecera .ico{font-size:2.6rem;line-height:1}
+.necesitas{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 22px}
+.nec{display:flex;gap:8px;align-items:center;background:var(--cielo-claro);border-radius:14px;padding:8px 12px;font-size:.92rem}
+.nec b{color:var(--cielo)}
+.camino{display:grid;gap:16px;counter-reset:paso}
+.paso{background:var(--tarjeta);border:2px solid var(--linea);border-radius:22px;padding:18px 20px 20px 70px;position:relative}
+.paso::before{counter-increment:paso;content:counter(paso);position:absolute;left:18px;top:16px;width:36px;height:36px;border-radius:50%;background:var(--cono);color:#fff;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;display:grid;place-items:center;font-size:1.1rem}
+.paso h3{margin-top:4px}
+.campos{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.campo label{display:block;font-weight:700;font-size:.9rem;margin-bottom:4px}
+.campo input,.campo textarea{width:100%;font:inherit;font-size:1rem;color:inherit;background:var(--papel);border:2px solid var(--linea);border-radius:12px;padding:9px 11px}
+.campo textarea{min-height:90px;resize:vertical}
+.campo.ancho{grid-column:1/-1}
+.campo input:focus,.campo textarea:focus{outline:none;border-color:var(--pista)}
+.prompt{background:var(--papel);border:2px dashed var(--pista);border-radius:16px;padding:14px 16px;white-space:pre-wrap;font-size:1rem;line-height:1.5;margin:6px 0 12px}
+.prompt mark{background:var(--cono-claro);color:var(--cono);border-radius:6px;padding:0 4px;font-weight:700}
+.acciones{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--pista);color:#fff;border:0;border-radius:999px;padding:11px 20px;font-weight:700;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
+.btn.sec{background:transparent;color:var(--tinta);border:2px solid var(--linea)}
+.btn:active{transform:scale(.97)}
+.ok{color:var(--pista);font-weight:700}
+.frases{display:grid;gap:8px}
+.frase{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--papel);border:2px solid var(--linea);border-radius:14px;padding:9px 12px;text-align:left}
+.frase:hover{border-color:var(--pista)}
+.frase small{color:var(--pista);font-weight:700;white-space:nowrap}
+.ojo{background:var(--aviso);border:2px solid var(--aviso-borde);border-radius:18px;padding:12px 16px;margin-top:16px}
+.ojo ul{margin:.3em 0 0;padding-left:1.2em}
+/* por qué */
+.mapa{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin:20px 0 30px}
+.col{display:grid;gap:10px}
+.app{background:var(--tarjeta);border:2px solid var(--linea);border-radius:18px;padding:10px 14px;display:flex;gap:12px;align-items:center}
+.app .e{font-size:1.6rem}.app b{display:block;line-height:1.2}.app small{color:var(--suave);line-height:1.3;display:block}
+.app.si{border-color:var(--pista)}.app.no{border-style:dashed;opacity:.85}
+.centro{width:170px;height:170px;border-radius:50%;background:var(--pista);color:#fff;display:grid;place-items:center;text-align:center;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.5rem;box-shadow:0 0 0 10px var(--pista-claro),0 0 0 22px color-mix(in srgb,var(--pista-claro) 50%,transparent)}
+.centro small{display:block;font-size:.8rem;font-weight:600;font-family:"Atkinson Hyperlegible",sans-serif;opacity:.9}
+.leyenda{display:flex;gap:18px;flex-wrap:wrap;font-size:.9rem;color:var(--suave);margin-bottom:24px}
+.leyenda i{display:inline-block;width:22px;height:14px;border-radius:5px;border:2px solid var(--pista);vertical-align:-2px;margin-right:6px}
+.leyenda i.d{border-style:dashed;border-color:var(--suave)}
+.razones{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+.razon{background:var(--tarjeta);border:2px solid var(--linea);border-radius:20px;padding:16px 18px}
+.razon .e{font-size:1.8rem}
+.analogia{background:var(--cono-claro);border-radius:22px;padding:18px 22px;margin:8px 0 22px;display:flex;gap:16px;align-items:flex-start}
+.analogia .e{font-size:2.4rem;line-height:1}
+/* conectar */
+.selector{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}
+.guia{display:none}.guia.on{display:block}
+.lista-pasos{display:grid;gap:10px;counter-reset:n;padding:0;margin:0;list-style:none}
+.lista-pasos li{background:var(--tarjeta);border:2px solid var(--linea);border-radius:16px;padding:12px 16px 12px 58px;position:relative}
+.lista-pasos li::before{counter-increment:n;content:counter(n);position:absolute;left:14px;top:11px;width:30px;height:30px;border-radius:50%;background:var(--cielo);color:#fff;display:grid;place-items:center;font-weight:700}
+.lista-pasos li.hecho{border-color:var(--pista);background:var(--pista-claro)}
+.lista-pasos li.hecho::before{content:"✓";background:var(--pista)}
+.marcar{float:right;background:none;border:2px solid var(--linea);border-radius:999px;padding:2px 10px;font-size:.82rem;margin-left:10px}
+.prueba{margin-top:14px}
+/* consejos */
+.reglas{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.regla{background:var(--tarjeta);border:2px solid var(--linea);border-radius:20px;padding:16px 18px}
+.regla.roja{border-color:var(--cono)}
+.formula{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}
+.formula div{border-radius:16px;padding:12px 14px;background:var(--pista-claro)}
+.formula b{display:block;color:var(--pista)}
+.antes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.antes div{border-radius:16px;padding:12px 14px;border:2px solid var(--linea)}
+.antes .mal{border-style:dashed}
+footer{color:var(--suave);font-size:.85rem;padding:20px 0 40px;border-top:2px solid var(--linea)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(120px);background:var(--tinta);color:var(--papel);padding:10px 18px;border-radius:999px;font-weight:700;transition:transform .25s;z-index:20}
+.toast:empty{visibility:hidden}.toast.on{transform:translateX(-50%) translateY(0)}
+@media (max-width:760px){body{font-size:18px}.saludo{grid-template-columns:1fr}.mapa{grid-template-columns:1fr}.centro{margin:0 auto;width:140px;height:140px}.antes{grid-template-columns:1fr}.paso{padding:56px 16px 18px}.paso::before{left:16px;top:12px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header><div class="wrap top">
+<button class="marca" data-ir="tareas"><span class="silbato">🏃</span>Claude en clase</button>
+<nav class="tabs" role="tablist" aria-label="Secciones">
+<button class="tab" role="tab" data-ir="tareas" aria-selected="true">¿Qué tengo que hacer?</button>
+<button class="tab" role="tab" data-ir="porque" aria-selected="false">Por qué Claude</button>
+<button class="tab" role="tab" data-ir="conectar" aria-selected="false">Conectar mis apps</button>
+<button class="tab" role="tab" data-ir="consejos" aria-selected="false">Consejos</button>
+</nav></div></header>
+
+<main class="wrap">
+
+<!-- ============ TAREAS ============ -->
+<section class="vista on" id="v-tareas">
+<div id="lista">
+<div class="saludo"><div>
+<h1>¿Qué tienes que hacer hoy?</h1>
+<p>Elige la tarea y esta guía te dice cómo pedírsela a Claude, qué app conectar y qué revisar al final.</p></div>
+<div class="lado"><b>Así funciona cada tarea</b>
+<div class="pasos3"><span>1 · Rellenas los huecos</span><span>2 · Copias la instrucción</span><span>3 · La pegas en Claude</span><span>4 · Revisas y guardas</span></div></div></div>
+<label class="buscar"><span aria-hidden="true">🔎</span><input id="q" type="search" placeholder="Escribe lo que necesitas: sesión, correo, cartel, Excel…" aria-label="Buscar tarea"></label>
+<div class="cats" id="cats"></div>
+<div id="grupos"></div>
+</div>
+<div id="detalle" hidden></div>
+</section>
+
+<!-- ============ POR QUÉ ============ -->
+<section class="vista" id="v-porque">
+<h1>Por qué Claude te encaja</h1>
+<p>Lo que marca la diferencia son los <b>conectores</b>: Claude no solo te contesta, también puede trabajar dentro de las aplicaciones que ya usas.</p>
+<div class="analogia"><span class="e">🔑</span><div><h3>¿Qué es un conector?</h3><p style="margin:0">Imagina que le das a un compañero de confianza la llave de un armario concreto del colegio. Con la llave del Drive puede buscar tus documentos y guardar otros nuevos; con la de Gmail puede leer un correo y dejarte la respuesta preparada. Solo usa la llave cuando tú se lo pides, y puedes quitársela cuando quieras.</p></div></div>
+<h2>Tus aplicaciones y Claude</h2>
+<div class="mapa">
+<div class="col">
+<div class="app si"><span class="e">📁</span><div><b>Google Drive, Docs y Hojas</b><small>Busca, lee y guarda tus documentos</small></div></div>
+<div class="app si"><span class="e">✉️</span><div><b>Gmail</b><small>Lee correos y te deja borradores</small></div></div>
+<div class="app si"><span class="e">📅</span><div><b>Google Calendar</b><small>Mira tu agenda y crea eventos</small></div></div>
+</div>
+<div class="centro"><div>Claude<small>tu ayudante</small></div></div>
+<div class="col">
+<div class="app si"><span class="e">🎨</span><div><b>Canva</b><small>Carteles, diplomas y presentaciones</small></div></div>
+<div class="app si"><span class="e">📊</span><div><b>Excel</b><small>Le subes el archivo y te devuelve uno nuevo</small></div></div>
+<div class="app no"><span class="e">🏫</span><div><b>Pincel Ekade, EVAGD y Classroom</b><small>Sin conexión directa: copias y pegas (sin nombres)</small></div></div>
+</div></div>
+<div class="leyenda"><span><i></i>Se conecta directamente</span><span><i class="d"></i>Se trabaja copiando y pegando</span></div>
+<h2>Lo que ganas</h2>
+<div class="razones">
+<div class="razon"><span class="e">🧩</span><h3>Trabaja donde tú trabajas</h3><p>Con Gmail, Drive y Calendar conectados no tienes que copiar y pegar: le dices «busca el correo del AMPA» y lo encuentra. Estos tres conectores están disponibles en todos los planes de Claude.</p></div>
+<div class="razon"><span class="e">📄</span><h3>Te entrega archivos de verdad</h3><p>Puede crearte un Word para imprimir, un Excel con fórmulas o un documento en tu Drive. No tienes que pasar nada a limpio.</p></div>
+<div class="razon"><span class="e">🗂️</span><h3>Se acuerda de tu contexto</h3><p>Con los Proyectos le explicas una vez quién eres, qué cursos das y cómo te gusta trabajar. Después no tienes que repetirlo.</p></div>
+<div class="razon"><span class="e">🔒</span><h3>Tus datos, bajo tu control</h3><p>Claude solo ve la cuenta que tú conectas. Anthropic indica que no entrena sus modelos con los datos de Gmail, Drive o Calendar de los conectores. Puedes desconectarlos cuando quieras.</p></div>
+</div>
+<p style="margin-top:20px"><button class="btn" data-ir="conectar">Quiero conectar mis apps →</button></p>
+</section>
+
+<!-- ============ CONECTAR ============ -->
+<section class="vista" id="v-conectar">
+<h1>Conectar mis apps, paso a paso</h1>
+<p>Solo hay que hacerlo una vez. Elige la aplicación y ve marcando cada paso cuando lo hagas.</p>
+<div class="selector" id="selGuia"></div>
+<div id="guias"></div>
+<div class="ojo"><b>⚠️ Si usas el correo del centro o de la Consejería</b><p style="margin:.3em 0 0">Puede salir el mensaje «Acceso bloqueado: el administrador de tu institución tiene que revisar…». Significa que la cuenta la controla la Consejería y tiene que autorizar Claude. Pregunta al coordinador TIC del centro. Mientras tanto, conecta tu cuenta personal y úsala solo para materiales sin datos de alumnado.</p></div>
+<p class="ok" style="margin-top:14px">Los nombres de los menús pueden cambiar un poco con las actualizaciones. Si no encuentras algo, escribe en Claude: «¿Cómo conecto Google Drive?» y te guía.</p>
+</section>
+
+<!-- ============ CONSEJOS ============ -->
+<section class="vista" id="v-consejos">
+<h1>Consejos para que salga bien a la primera</h1>
+<h2>La fórmula de una buena petición</h2>
+<div class="formula">
+<div><b>1 · Quién eres</b>Maestra de EF de Primaria en Canarias</div>
+<div><b>2 · Qué necesitas</b>Una sesión de 55 minutos de equilibrio</div>
+<div><b>3 · Para quién</b>3.º de Primaria, 25 alumnos, gimnasio pequeño</div>
+<div><b>4 · Cómo lo quieres</b>En una tabla, para imprimir en una página</div>
+</div>
+<div class="antes"><div class="mal"><b>❌ Así cuesta más</b><p>«Hazme una sesión de educación física.»</p></div><div><b>✅ Así sale bien</b><p>«Soy maestra de EF. Hazme una sesión de 55 minutos para 3.º sobre equilibrio, con 25 alumnos en un gimnasio pequeño, en una tabla para imprimir.»</p></div></div>
+
+<h2 style="margin-top:28px">Reglas de oro</h2>
+<div class="reglas">
+<div class="regla roja"><h3>🛡️ Nunca datos personales del alumnado</h3><p>Ni nombres, ni notas con nombre, ni informes médicos o de NEAE. Usa «Alumno 1», «Alumna A» o iniciales. Cuando Claude te devuelva el trabajo, pones tú los nombres.</p></div>
+<div class="regla"><h3>👀 Revisa siempre</h3><p>Claude puede equivocarse o inventar algún dato, sobre todo con normativa o fechas. Para el currículo, pégale los criterios oficiales en vez de pedírselos de memoria.</p></div>
+<div class="regla"><h3>💬 Conversa, no empieces de cero</h3><p>Si algo no te gusta, díselo en el mismo chat: «más corto», «para 1.º», «sin material», «más juegos cooperativos».</p></div>
+<div class="regla"><h3>✋ Tú das el último paso</h3><p>Pídele que deje los correos en borradores y que te enseñe los eventos antes de crearlos. Enviar y confirmar lo haces tú.</p></div>
+</div>
+
+<h2 style="margin-top:28px">Crea tu Proyecto «Educación Física»</h2>
+<p>Un Proyecto es una carpeta de Claude con instrucciones fijas. En Claude, entra en <b>Proyectos → Crear proyecto</b> y pega este texto en las instrucciones. Cámbialo a tu gusto:</p>
+<div class="prompt" id="proy">Soy maestra especialista en Educación Física de Educación Primaria en un colegio público de Canarias. Doy clase en varios cursos de Primaria y también me encargo de tareas administrativas y de organizar eventos deportivos del centro.
+Cuando me ayudes:
+- Escribe en español de España, con un lenguaje claro y cercano.
+- Para sesiones, usa siempre calentamiento, parte principal y vuelta a la calma, con tiempos, organización, variantes y seguridad.
+- Ten en cuenta el clima de Canarias (calor, calima, lluvia ocasional) y propón un plan B.
+- Usa el vocabulario de la LOMLOE (situaciones de aprendizaje, criterios de evaluación, saberes básicos).
+- Nunca me pidas datos personales del alumnado; usa «Alumno 1, Alumno 2…».
+- Si no estás seguro de algo de normativa, dímelo en vez de inventarlo.</div>
+<div class="acciones"><button class="btn" data-copiar="proy">📋 Copiar instrucciones</button><a class="btn sec" href="https://claude.ai/projects" target="_blank" rel="noopener">Abrir Proyectos ↗</a></div>
+</section>
+
+<footer>Guía preparada para uso personal. Comprobado en octubre de 2026: los conectores de Gmail, Google Calendar y Google Drive están disponibles para todos los usuarios de Claude; otros conectores, como Canva, pueden depender del plan.</footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const CON={
+ drive:{n:'Google Drive',e:'📁',d:'para guardar o buscar documentos'},
+ gmail:{n:'Gmail',e:'✉️',d:'para leer correos y dejar borradores'},
+ cal:{n:'Google Calendar',e:'📅',d:'para crear y consultar eventos'},
+ canva:{n:'Canva',e:'🎨',d:'para que diseñe directamente en tu Canva'},
+ file:{n:'Subir un archivo',e:'📎',d:'botón + del chat → subir archivo'},
+ none:{n:'Nada que conectar',e:'💬',d:'basta con escribir en el chat'}
+};
+const CATS=[['clases','🏐 Mis clases'],['admin','🗂️ Papeleo y correos'],['eventos','🏆 Eventos']];
+const T=[
+/* ---------- CLASES ---------- */
+{id:'sesion',cat:'clases',e:'⏱️',t:'Planificar una sesión',d:'Calentamiento, parte principal y vuelta a la calma, lista para imprimir.',con:['none','drive'],
+ f:[['curso','Curso','3.º de Primaria'],['dur','Duración','55 minutos'],['tema','Tema','equilibrio y coordinación'],['al','Nº de alumnos','25'],['esp','Espacio','cancha exterior'],['mat','Material disponible','aros, conos, pelotas de espuma']],
+ p:'Actúa como maestra especialista en Educación Física de Primaria en Canarias. Diséñame una sesión para {curso}, de {dur}, sobre {tema}. Somos {al} alumnos en {esp} y tengo este material: {mat}.\n\nEstructúrala en calentamiento, parte principal y vuelta a la calma. Para cada actividad indica: nombre, tiempo, organización del grupo, explicación sencilla, una variante más fácil y otra más difícil, y normas de seguridad.\nPreséntalo en una tabla que quepa en una página para imprimir.',
+ m:['Añade un plan B por si llueve y tengo que darla en el aula','Hazla para 45 minutos en vez de los que te dije','Guárdala en mi Google Drive como documento con el título «Sesión – {tema}»','Hazme también la versión para 6.º, con más dificultad'],
+ o:['Comprueba que los tiempos suman la duración real de la clase.','Mira que el material coincide con el que tienes de verdad.']},
+{id:'sa',cat:'clases',e:'🧭',t:'Situación de aprendizaje',d:'Una unidad completa con sesiones, evaluación y atención a la diversidad.',con:['none','drive'],
+ f:[['curso','Curso','4.º de Primaria'],['tema','Tema o reto','juegos y deportes tradicionales canarios'],['ses','Nº de sesiones','6'],['tri','Trimestre','segundo trimestre'],['crit','Criterios de evaluación (pégalos del currículo oficial)','Pega aquí los criterios que quieres trabajar',1]],
+ p:'Soy maestra de Educación Física de Primaria en Canarias. Ayúdame a diseñar una situación de aprendizaje para {curso} sobre {tema}, de {ses} sesiones, para el {tri}.\n\nEstos son los criterios de evaluación del currículo de Canarias que quiero trabajar:\n{crit}\n\nIncluye: título atractivo, justificación breve, producto final, secuencia de sesiones (una línea por sesión), instrumentos de evaluación y medidas de atención a la diversidad. Usa solo los criterios que te he dado; si necesitas algo que no tienes, pregúntamelo.',
+ m:['Desarrolla la sesión 1 completa con tiempos y organización','Hazme una rúbrica para el producto final','Guárdalo en mi Google Drive como documento'],
+ o:['Claude no siempre conoce al día la normativa: usa los criterios oficiales que pegues tú.','Revisa que el producto final sea realista para tu centro.']},
+{id:'juegos',cat:'clases',e:'🎯',t:'Ideas de juegos y calentamientos',d:'Una batería de juegos según edad, objetivo y material.',con:['none'],
+ f:[['curso','Curso o edad','1.º y 2.º de Primaria'],['obj','Objetivo','cooperación y respeto de turnos'],['esp','Espacio','gimnasio'],['mat','Material','pañuelos, picas, balones'],['n','¿Cuántos juegos?','8']],
+ p:'Dame {n} juegos para Educación Física con alumnado de {curso}. Objetivo: {obj}. Espacio: {esp}. Material: {mat}.\n\nPara cada juego: nombre, cómo se juega en tres frases, organización, material y una variante. Incluye al menos un juego o deporte tradicional canario si encaja. Ordénalos de más tranquilo a más intenso.',
+ m:['Conviértelos en fichas para recortar, una por juego','Dame 5 calentamientos de 5 minutos con música','Quita los que necesitan balón'],
+ o:['Piensa en la seguridad del espacio real antes de usarlos.']},
+{id:'neae',cat:'clases',e:'🤝',t:'Adaptar una actividad (NEAE)',d:'Que todo el grupo participe, con opciones para cada necesidad.',con:['none'],
+ f:[['act','Actividad que quieres adaptar','circuito de saltos y carreras'],['nec','Necesidad, sin nombres ni datos','alumno con movilidad reducida en las piernas'],['curso','Curso','5.º de Primaria']],
+ p:'Soy maestra de Educación Física. En {curso} voy a hacer esta actividad: {act}. Tengo un alumno o alumna con esta necesidad: {nec}.\n\nPropónme tres formas de adaptarla para que participe con el resto del grupo y no por separado. Indica qué cambia en reglas, espacio, material y roles, y cómo explicárselo al grupo con naturalidad.',
+ m:['¿Qué otras actividades de mi trimestre necesitarían adaptación parecida?','Hazme una tabla resumen para el expediente del aula, sin nombres'],
+ o:['Nunca escribas nombres, diagnósticos completos ni informes: describe solo lo necesario.','Contrasta las adaptaciones con el equipo de orientación.']},
+{id:'rubrica',cat:'clases',e:'✅',t:'Rúbrica o lista de evaluación',d:'Criterios observables y una hoja Excel lista para rellenar.',con:['none','file'],
+ f:[['curso','Curso','2.º de Primaria'],['que','¿Qué quieres evaluar?','saltar a la comba'],['niv','Niveles','4 (Inicial, En proceso, Conseguido, Excelente)'],['al','Nº de alumnos','24']],
+ p:'Créame una rúbrica de Educación Física para {curso} para evaluar: {que}. Usa {niv}. Cada descriptor tiene que ser algo que se pueda observar en clase.\n\nDespués, prepárame un archivo Excel para rellenarla en el gimnasio: una fila por alumno ({al} filas con «Alumno 1, Alumno 2…»), una columna por criterio con lista desplegable de niveles y una columna con la nota final calculada automáticamente.',
+ m:['Añade una columna de observaciones','Haz una versión de autoevaluación con caritas para el alumnado','Explícame cómo cambiar «Alumno 1» por los nombres reales en Excel'],
+ o:['Pon tú los nombres reales en el Excel, en tu ordenador.','Prueba la fórmula de la nota con dos o tres casos.']},
+{id:'lluvia',cat:'clases',e:'🌧️',t:'Plan para día de lluvia o calima',d:'Una sesión en el aula, sin mover casi las mesas.',con:['none'],
+ f:[['curso','Curso','3.º de Primaria'],['dur','Duración','45 minutos'],['aula','Cómo es el aula','aula pequeña con mesas en filas']],
+ p:'Hoy no puedo salir a la cancha por lluvia o calima. Diséñame una sesión de Educación Física de {dur} para {curso} en {aula}.\n\nQue sea de baja intensidad pero activa: juegos de atención y reacción, expresión corporal, estiramientos y un poco de teoría jugada (por ejemplo, hábitos saludables). Indica tiempos y cómo organizar al grupo sin chocar con el mobiliario.',
+ m:['Dame cinco sesiones así para tener siempre una preparada','Añade una ficha breve de hábitos saludables']},
+/* ---------- ADMIN ---------- */
+{id:'correo',cat:'admin',e:'✉️',t:'Escribir un correo a las familias',d:'Claro, cercano y guardado como borrador en tu Gmail.',con:['gmail'],
+ f:[['curso','Para las familias de','4.º A'],['mot','Motivo','recordatorio de traer ropa deportiva y agua'],['datos','Datos importantes','todos los martes y jueves; botella con nombre'],['tono','Tono','cercano pero formal']],
+ p:'Escribe un correo para las familias de {curso} sobre: {mot}. Datos importantes: {datos}.\nTono {tono}, frases cortas y un resumen en una línea al final.\n\nDéjalo como borrador en mi Gmail para que yo lo revise y lo envíe. No lo envíes tú.',
+ m:['Hazme también una versión corta para el grupo de WhatsApp de delegados','Tradúcelo al inglés para una familia que no habla español','Ponlo más corto y directo'],
+ o:['Revisa el borrador en Gmail antes de enviarlo.','Comprueba destinatarios y fechas.']},
+{id:'responder',cat:'admin',e:'↩️',t:'Responder un correo',d:'Claude busca el correo en tu Gmail y te prepara la respuesta.',con:['gmail'],
+ f:[['quien','¿De quién es el correo?','la dirección del centro'],['asunto','¿De qué trata?','el horario de la jornada deportiva'],['resp','¿Qué quieres contestar?','que me parece bien y que necesito dos profesores más'],['tono','Tono','amable y formal']],
+ p:'Busca en mi Gmail el correo más reciente de {quien} sobre {asunto}. Resúmemelo en dos líneas y prepárame una respuesta {tono} diciendo {resp}.\n\nDéjala como borrador en ese mismo hilo; no la envíes.',
+ m:['¿Hay más correos pendientes sobre este tema esta semana?','Hazme una lista de los correos de familias sin responder'],
+ o:['Lee el resumen para comprobar que encontró el correo correcto.']},
+{id:'circular',cat:'admin',e:'📝',t:'Circular y autorización',d:'Para salidas o actividades, con el recortable de firma.',con:['none','file'],
+ f:[['act','Actividad','salida al polideportivo municipal'],['fecha','Fecha y horario','viernes 14 de noviembre, de 9:00 a 13:00'],['lugar','Lugar','Polideportivo municipal'],['precio','Precio','gratuito'],['llevar','Qué deben llevar','ropa deportiva, agua, desayuno y gorra']],
+ p:'Redacta una circular para las familias sobre esta actividad: {act}. Fecha y horario: {fecha}. Lugar: {lugar}. Precio: {precio}. Deben llevar: {llevar}.\n\nAl final, añade una autorización recortable con espacio para el nombre del alumno o alumna, curso, nombre y DNI de la madre, padre o tutor, teléfono de contacto y firma.\nEntrégamelo en un documento Word que quepa en una página para imprimir.',
+ m:['Añade el logo: te lo subo ahora','Hazme también la versión para publicar en el blog del centro','Prepara el correo para enviarla por Gmail como borrador'],
+ o:['Revisa fechas, horario y precio antes de imprimir.']},
+{id:'acta',cat:'admin',e:'🗒️',t:'Pasar a limpio un acta',d:'De tus notas sueltas a un acta ordenada en tu Drive.',con:['drive'],
+ f:[['tipo','Tipo de reunión','reunión de ciclo'],['notas','Tus notas (tal cual las tengas)','pega o escribe aquí tus notas, aunque estén desordenadas',1]],
+ p:'Convierte estas notas de una {tipo} en un acta formal: fecha, asistentes, orden del día, resumen de cada punto, acuerdos y tareas pendientes con responsable y fecha.\n\nNotas:\n{notas}\n\nSi falta algún dato, déjalo marcado como [completar] en lugar de inventarlo. Guárdala en mi Google Drive como documento.',
+ m:['Hazme una lista de tareas solo con lo que me toca a mí','Prepara un correo con el resumen para el claustro, como borrador'],
+ o:['Busca los [completar] y rellénalos tú.']},
+{id:'agenda',cat:'admin',e:'📅',t:'Organizar fechas en mi calendario',d:'Evaluaciones, reuniones y entregas, de golpe en tu Calendar.',con:['cal'],
+ f:[['fechas','Lista de fechas (una por línea)','martes 4 nov 13:00 reunión de ciclo\njueves 13 nov evaluación de saltos 4.º A\n20 nov entrega de notas',1],['aviso','Aviso','un día antes']],
+ p:'Quiero tener estas fechas en mi Google Calendar:\n{fechas}\n\nAntes de crear nada, enséñame la lista de eventos con día y hora para que la confirme. Cuando te diga «adelante», créalos con un aviso {aviso}.',
+ m:['¿Qué tengo esta semana en el calendario?','Busca un hueco de una hora el jueves para preparar el evento'],
+ o:['Revisa la lista antes de decir «adelante».']},
+{id:'excel',cat:'admin',e:'📊',t:'Crear o arreglar un Excel',d:'Notas, inscripciones o inventario, con fórmulas hechas.',con:['file'],
+ f:[['uso','¿Para qué es?','controlar el material del gimnasio'],['cols','Columnas que necesitas','material, cantidad, estado, ubicación, fecha de revisión'],['calc','¿Qué debe calcular o avisar?','marcar en rojo lo que está en mal estado']],
+ p:'Créame un archivo Excel para {uso}. Columnas: {cols}. Además, quiero que: {calc}.\n\nAñade una primera hoja con instrucciones sencillas de uso. Si hay alumnado, usa «Alumno 1, Alumno 2…» en lugar de nombres.',
+ m:['Te adjunto mi Excel actual: dime qué falla y arréglalo','Añade un gráfico resumen','Explícame paso a paso cómo usar el filtro'],
+ o:['Si subes un Excel tuyo, quítale antes los nombres del alumnado.','Abre el archivo y prueba las fórmulas.']},
+{id:'pincel',cat:'admin',e:'🏫',t:'Trabajar con datos de Pincel Ekade o EVAGD',d:'Comentarios de boletín y resúmenes, sin nombres.',con:['file'],
+ f:[['obj','¿Qué necesitas?','redactar comentarios del boletín según el nivel de cada criterio'],['datos','Datos sin nombres (copiados de Pincel Ekade/EVAGD)','Alumno 1: C1 Conseguido, C2 En proceso\nAlumno 2: C1 Excelente, C2 Conseguido',1]],
+ p:'Te paso datos de evaluación de Educación Física sin nombres:\n{datos}\n\nAyúdame a {obj}. Escribe en tono positivo, con una fortaleza y un aspecto a mejorar por alumno, en dos frases como máximo.\nDevuélvemelo en una tabla con el mismo orden para que yo lo copie después en Pincel Ekade.',
+ m:['Hazlos más cortos: máximo 200 caracteres','Dame tres versiones del comentario para elegir'],
+ o:['Pincel Ekade y EVAGD no se conectan con Claude: copias, quitas los nombres, pegas y devuelves el resultado tú.','Antes de pegar, sustituye cada nombre por «Alumno 1, 2…» y guarda tú la correspondencia.']},
+/* ---------- EVENTOS ---------- */
+{id:'evento',cat:'eventos',e:'🏆',t:'Diseñar un evento deportivo',d:'Día del deporte, miniolimpiada o carrera solidaria, con todo el plan.',con:['none','drive'],
+ f:[['tipo','Tipo de evento','miniolimpiada del Día de Canarias'],['part','Participantes','de 1.º a 6.º, unos 220 alumnos'],['fecha','Fecha y horario','29 de mayo, de 9:00 a 13:30'],['lugar','Lugar','patio y cancha del colegio'],['adultos','Adultos disponibles','12 docentes y 6 familias voluntarias']],
+ p:'Ayúdame a organizar este evento: {tipo}. Participantes: {part}. Fecha y horario: {fecha}. Lugar: {lugar}. Contamos con {adultos}.\n\nPrepárame un plan completo:\n1. Objetivo y nombre atractivo.\n2. Horario detallado por franjas.\n3. Pruebas o estaciones adaptadas por edades, con rotación de grupos.\n4. Funciones de cada adulto.\n5. Lista de material.\n6. Plan B por lluvia, calor o calima, y medidas de seguridad e hidratación.\n7. Lista de tareas con plazos: 4 semanas antes, 2 semanas antes, la semana del evento y el mismo día.\nGuárdalo en mi Google Drive como documento.',
+ m:['Crea en mi Calendar las reuniones de preparación que propones','Hazme el cuadrante de grupos en Excel','Prepara la circular para las familias'],
+ o:['Revisa el horario con el resto del claustro.','Comprueba que el material existe en el centro.']},
+{id:'canva',cat:'eventos',e:'🎨',t:'Cartel, diploma o medalla en Canva',d:'Claude diseña directamente en tu cuenta de Canva.',con:['canva'],
+ f:[['pieza','¿Qué quieres?','cartel'],['ev','Evento','Miniolimpiada del Día de Canarias'],['info','Información que debe aparecer','29 de mayo · de 9:00 a 13:30 · patio del colegio'],['estilo','Estilo','alegre, colores de la bandera canaria, para niños']],
+ p:'Canva: crea un {pieza} para «{ev}». Debe aparecer: {info}. Estilo: {estilo}.\nDame varias opciones para elegir y el enlace para abrirlo en mi Canva.',
+ m:['Me gusta la opción 2: cambia el título por «¡A moverse!»','Hazme también un diploma de participación con el mismo estilo','Prepara la versión en tamaño para redes sociales'],
+ o:['Revisa la ortografía y los datos en Canva antes de imprimir.','Si el conector de Canva no aparece, puede depender de tu plan: pide a Claude el texto y el diseño y lo montas tú en Canva.']},
+{id:'cuadrante',cat:'eventos',e:'🔁',t:'Grupos y rotaciones del evento',d:'Un Excel con quién va a cada estación y a qué hora.',con:['file'],
+ f:[['grupos','Nº de grupos','12'],['est','Estaciones o pruebas','salto de longitud, relevos, lucha canaria adaptada, comba, carrera de sacos, juego del pañuelo'],['tiempo','Tiempo por estación','15 minutos'],['inicio','Hora de inicio','9:30']],
+ p:'Créame un archivo Excel con el cuadrante de rotaciones de un evento deportivo: {grupos} grupos y estas estaciones: {est}. Cada estación dura {tiempo}, con 5 minutos de cambio, empezando a las {inicio}.\n\nHoja 1: tabla grupo × hora con la estación de cada uno, sin repeticiones.\nHoja 2: una ficha por estación con los grupos que pasan y a qué hora, para imprimir y dar al adulto responsable.',
+ m:['Añade colores por grupo','Mete un descanso de 20 minutos a las 11:00'],
+ o:['Comprueba que ningún grupo repite estación.']},
+{id:'comunicar',cat:'eventos',e:'📣',t:'Comunicar el evento',d:'Correo a familias, mensaje al claustro y fechas en el calendario.',con:['gmail','cal'],
+ f:[['ev','Evento','Miniolimpiada del Día de Canarias'],['datos','Datos clave','29 de mayo, de 9:00 a 13:30; ropa deportiva, gorra, agua y desayuno; se buscan familias voluntarias'],['reu','Reuniones de preparación','12 de mayo y 26 de mayo a las 13:00']],
+ p:'Vamos a comunicar el evento «{ev}». Datos clave: {datos}.\n1. Prepara un correo para las familias y déjalo como borrador en mi Gmail.\n2. Escribe un mensaje breve para el claustro.\n3. Enséñame los eventos de las reuniones de preparación ({reu}) y, cuando te lo confirme, créalos en mi Google Calendar.',
+ m:['Escribe un recordatorio para enviar dos días antes','Haz un texto corto para la web o el blog del centro'],
+ o:['Revisa el borrador antes de enviarlo y confirma los eventos uno a uno.']},
+/* ---------- OTRA ---------- */
+{id:'otra',cat:'otra',e:'✨',t:'Otra cosa',d:'¿No está tu tarea? Construye tu propia petición con la fórmula.',con:['none'],
+ f:[['quien','Quién soy','maestra de Educación Física de Primaria en Canarias'],['que','Qué necesito','…'],['para','Para quién o para qué','…'],['como','Cómo lo quiero','en una tabla / en un Word / en un correo / en 5 puntos']],
+ p:'Soy {quien}. Necesito {que}. Es para {para}. Entrégamelo {como}.\nSi te falta información para hacerlo bien, hazme preguntas antes de empezar.',
+ m:['Hazlo más sencillo','Dame tres opciones distintas'],o:['Si la respuesta no te convence, explícale qué cambiar en el mismo chat.']}
+];
+
+const $=s=>document.querySelector(s);const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let catSel='todas';
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1800)}
+async function copiar(txt){try{await navigator.clipboard.writeText(txt);toast('✓ Copiado. Ahora pégalo en Claude')}catch(e){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();toast(ok?'✓ Copiado. Ahora pégalo en Claude':'Selecciona el texto y cópialo a mano')}}
+
+/* Navegación */
+function ir(v){document.querySelectorAll('.vista').forEach(s=>s.classList.toggle('on',s.id=='v-'+v));document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.ir==v));if(v=='tareas')verLista();scrollTo(0,0)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-ir]');if(b){ir(b.dataset.ir)}const c=e.target.closest('[data-copiar]');if(c)copiar(document.getElementById(c.dataset.copiar).innerText)});
+
+/* Lista de tareas */
+$('#cats').innerHTML=[['todas','Todas'],...CATS].map(([k,n])=>`<button class="cat" data-c="${k}" aria-pressed="${k=='todas'}">${n}</button>`).join('');
+$('#cats').onclick=e=>{const b=e.target.closest('.cat');if(!b)return;catSel=b.dataset.c;$('#cats').querySelectorAll('.cat').forEach(x=>x.setAttribute('aria-pressed',x==b));pintar()};
+$('#q').oninput=pintar;
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function tarjeta(t){return `<button class="tarea" data-t="${t.id}"><span class="ico">${t.e}</span><b>${t.t}</b><span class="d">${t.d}</span><span class="chips">${t.con.map(c=>`<span class="chip ${c=='none'?'nada':''}">${CON[c].e} ${CON[c].n}</span>`).join('')}</span></button>`}
+function pintar(){const q=norm($('#q').value.trim());let h='';
+ [...CATS,['otra','✨ ¿Algo distinto?']].forEach(([k,n])=>{if(catSel!='todas'&&catSel!=k&&k!='otra')return;
+  const L=T.filter(t=>t.cat==k&&(!q||norm(t.t+' '+t.d+' '+t.p).includes(q)));if(!L.length)return;
+  h+=`<div class="grupo"><h2>${n}</h2><small>${L.length} ${L.length==1?'tarea':'tareas'}</small></div><div class="rejilla">${L.map(tarjeta).join('')}</div>`});
+ $('#grupos').innerHTML=h||'<p class="vacio">No encuentro esa tarea. Prueba con otra palabra o usa «Otra cosa».</p>'+'<div class="rejilla">'+tarjeta(T.find(t=>t.id=='otra'))+'</div>'}
+$('#grupos').onclick=e=>{const b=e.target.closest('.tarea');if(b)abrir(b.dataset.t)};
+
+/* Detalle */
+function guardado(id){try{return JSON.parse(localStorage.getItem('f_'+id)||'{}')}catch(e){return{}}}
+function guardar(id,o){try{localStorage.setItem('f_'+id,JSON.stringify(o))}catch(e){}}
+function verLista(){$('#lista').hidden=false;$('#detalle').hidden=true}
+function abrir(id){const t=T.find(x=>x.id==id),g=guardado(id);ir('tareas');$('#lista').hidden=true;const D=$('#detalle');D.hidden=false;
+ D.innerHTML=`<button class="volver" id="volver">← Todas las tareas</button>
+ <div class="cabecera"><span class="ico">${t.e}</span><div><h1 style="font-size:clamp(1.8rem,4vw,2.6rem)">${t.t}</h1><p style="margin:0">${t.d}</p></div></div>
+ <h3 style="margin-top:14px">Qué vas a necesitar</h3>
+ <div class="necesitas">${t.con.map(c=>`<div class="nec"><span>${CON[c].e}</span><span><b>${CON[c].n}</b> · ${CON[c].d}</span></div>`).join('')}
+ ${t.con.some(c=>c!='none'&&c!='file')?'<button class="btn sec" data-ir="conectar" style="padding:6px 14px">¿Cómo se conecta?</button>':''}</div>
+ <div class="camino">
+ <div class="paso"><h3>Rellena los huecos</h3><p>Escribe tus datos. Si dejas un hueco vacío, se usará el ejemplo gris.</p><div class="campos">${t.f.map(([k,l,ph,big])=>`<div class="campo${big?' ancho':''}"><label for="c_${k}">${l}</label>${big?`<textarea id="c_${k}" data-k="${k}" placeholder="${esc(ph)}">${esc(g[k]||'')}</textarea>`:`<input id="c_${k}" data-k="${k}" placeholder="${esc(ph)}" value="${esc(g[k]||'')}">`}</div>`).join('')}</div></div>
+ <div class="paso"><h3>Copia la instrucción y pégala en Claude</h3><p>Lo resaltado en naranja es lo que has escrito o el ejemplo.${t.con.some(c=>c!='none'&&c!='file')?' Antes de enviarla, en el chat pulsa <b>+</b> → <b>Conectores</b> y activa '+t.con.filter(c=>c!='none'&&c!='file').map(c=>CON[c].n).join(' y ')+'.':''}${t.con.includes('file')?' Si tienes un archivo, súbelo con el botón <b>+</b> del chat.':''}</p>
+ <div class="prompt" id="pr"></div>
+ <div class="acciones"><button class="btn" id="cp">📋 Copiar instrucción</button><a class="btn sec" href="https://claude.ai/new" target="_blank" rel="noopener">Abrir Claude ↗</a></div></div>
+ <div class="paso"><h3>Pide mejoras en el mismo chat</h3><p>Toca una frase para copiarla y pégala debajo de la respuesta de Claude.</p><div class="frases">${t.m.map((m,i)=>`<button class="frase" data-m="${i}"><span class="ft">${esc(m)}</span><small>Copiar</small></button>`).join('')}</div></div>
+ <div class="paso"><h3>Revisa antes de usarlo</h3><ul style="margin:.2em 0;padding-left:1.2em">${t.o.map(o=>`<li>${o}</li>`).join('')}<li>Nunca incluyas nombres ni datos personales del alumnado.</li></ul></div>
+ </div>`;
+ const vals=()=>{const o={};D.querySelectorAll('[data-k]').forEach(i=>o[i.dataset.k]=i.value.trim());return o};
+ const fill=(s,plain)=>{const v=vals();return s.replace(/\{(\w+)\}/g,(m,k)=>{const f=t.f.find(x=>x[0]==k);const val=v[k]||(f?f[2]:'');return plain?val:'<mark>'+esc(val)+'</mark>'})};
+ const up=()=>{D.querySelector('#pr').innerHTML=fill(esc(t.p).replace(/\{(\w+)\}/g,'{$1}'));D.querySelectorAll('.frase').forEach(b=>b.querySelector('.ft').textContent=fill(t.m[+b.dataset.m],true));guardar(id,vals())};
+ D.querySelectorAll('[data-k]').forEach(i=>i.oninput=up);up();
+ D.querySelector('#cp').onclick=()=>copiar(fill(t.p,true));
+ D.querySelectorAll('.frase').forEach(b=>b.onclick=()=>copiar(fill(t.m[+b.dataset.m],true)));
+ D.querySelector('#volver').onclick=()=>{verLista();scrollTo(0,0)};scrollTo(0,0)}
+
+/* Guías de conexión */
+const G={
+ google:{n:'✉️📁📅 Gmail, Drive y Calendar',p:['Entra en <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a> con tu cuenta.','Pulsa tu nombre abajo a la izquierda y entra en <b>Ajustes</b> (o <b>Personalizar</b>) → <b>Conectores</b>.','Busca <b>Gmail</b> y pulsa <b>Conectar</b>.','Elige tu cuenta de Google y pulsa <b>Permitir</b>. Lee qué permisos pide.','Repite lo mismo con <b>Google Drive</b> y <b>Google Calendar</b>.','En un chat nuevo, pulsa <b>+</b> → <b>Conectores</b> y comprueba que están activados.'],prueba:'¿Qué tengo mañana en el calendario y hay algún correo importante sin leer?'},
+ canva:{n:'🎨 Canva',p:['En Claude, ve a <b>Ajustes</b> (o <b>Personalizar</b>) → <b>Conectores</b>.','Pulsa <b>Explorar conectores</b> y escribe <b>Canva</b> en el buscador.','Pulsa <b>Conectar</b> e inicia sesión en tu cuenta de Canva.','Acepta los permisos.','En el chat, empieza la petición con «Canva:» para que lo use.'],prueba:'Canva: enséñame mis últimos diseños.',nota:'Según tu plan de Claude, este conector puede no estar disponible. Si no aparece, Claude te escribe el texto y la idea del diseño, y tú lo montas en Canva.'},
+ excel:{n:'📊 Excel',p:['Excel no necesita conector: trabajas con archivos.','En el chat, pulsa <b>+</b> → <b>Subir archivo</b> y elige tu Excel. Antes, quítale los nombres del alumnado.','Dile qué quieres: «arregla la fórmula de la media», «añade una columna…».','Claude te devuelve un Excel nuevo: pulsa sobre él para <b>descargarlo</b>.','También puedes pedirle un Excel desde cero.'],prueba:'Créame un Excel para apuntar el material del gimnasio con su estado.'},
+ pincel:{n:'🏫 Pincel Ekade, EVAGD y Classroom',p:['Estas plataformas no tienen conector oficial con Claude.','Copia o exporta los datos que necesites (por ejemplo, niveles de logro).','Antes de pegarlos, cambia cada nombre por «Alumno 1, Alumno 2…» y guarda tú la correspondencia.','Pégalos en Claude y pide lo que necesitas (comentarios, resumen, tabla…).','Copia el resultado y pásalo tú a la plataforma, poniendo los nombres reales.'],prueba:'Te paso niveles de logro sin nombres: redacta un comentario breve y positivo para cada alumno.'}
+};
+$('#selGuia').innerHTML=Object.entries(G).map(([k,g],i)=>`<button class="cat" data-g="${k}" aria-pressed="${i==0}">${g.n}</button>`).join('');
+$('#guias').innerHTML=Object.entries(G).map(([k,g],i)=>{const h=guardado('g_'+k);return `<div class="guia${i==0?' on':''}" id="g-${k}"><ol class="lista-pasos">${g.p.map((p,j)=>`<li class="${h[j]?'hecho':''}"><button class="marcar" data-g="${k}" data-j="${j}">${h[j]?'Hecho ✓':'Marcar'}</button>${p}</li>`).join('')}</ol>${g.nota?`<div class="ojo">${g.nota}</div>`:''}<div class="prueba"><h3>Pruébalo con esta frase</h3><div class="prompt" id="pg-${k}">${g.prueba}</div><div class="acciones"><button class="btn" data-copiar="pg-${k}">📋 Copiar</button><a class="btn sec" href="https://claude.ai/new" target="_blank" rel="noopener">Abrir Claude ↗</a></div></div></div>`}).join('');
+$('#selGuia').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;$('#selGuia').querySelectorAll('.cat').forEach(x=>x.setAttribute('aria-pressed',x==b));document.querySelectorAll('.guia').forEach(x=>x.classList.toggle('on',x.id=='g-'+b.dataset.g))};
+$('#guias').onclick=e=>{const b=e.target.closest('.marcar');if(!b)return;const k=b.dataset.g,j=b.dataset.j,h=guardado('g_'+k);h[j]=!h[j];guardar('g_'+k,h);const li=b.parentElement;li.classList.toggle('hecho',h[j]);b.textContent=h[j]?'Hecho ✓':'Marcar'};
+pintar();
+</script></body></html>
